@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Cart — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.cart-item{background:#1A3530;border-radius:16px;padding:16px 20px;border:1.5px solid rgba(255,255,255,0.10);margin-bottom:12px;display:flex;align-items:center;gap:14px;transition:.2s}
+.cart-item:hover{border-color:rgba(232,169,69,0.35);box-shadow:0 6px 22px rgba(255,82,0,.08)}
+.ci-thumb{width:62px;height:62px;border-radius:13px;object-fit:cover;flex-shrink:0}
+.ci-thumb-ph{width:62px;height:62px;border-radius:13px;background:linear-gradient(135deg,#1F3D38,#2A4D46);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0}
+.ci-name{font-weight:700;font-size:.95rem;color:#fff;margin-bottom:2px}
+.ci-cat{font-size:.78rem;color:rgba(255,255,255,0.45)}
+.qty-ctrl{display:flex;align-items:center;border:2px solid rgba(255,255,255,0.10);border-radius:11px;overflow:hidden}
+.qty-btn{background:#162E29;border:none;width:33px;height:33px;font-size:1rem;font-weight:700;cursor:pointer;transition:.15s;color:#E8EDE8;font-family:inherit}
+.qty-btn:hover{background:rgba(232,169,69,0.12);color:#FF5200}
+.qty-num{width:36px;text-align:center;font-weight:700;font-size:.93rem;border:none;background:transparent;outline:none}
+.ci-price{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;color:#FF5200;min-width:72px;text-align:right}
+.rm-btn{color:#E5E5E5;border:none;background:none;padding:4px 8px;cursor:pointer;font-size:.9rem;transition:.15s}
+.rm-btn:hover{color:#EF4444}
+/* Summary */
+.summary{background:#1A3530;border-radius:20px;border:1.5px solid rgba(255,255,255,0.10);padding:24px;position:sticky;top:76px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:.9rem}
+.sum-row span{color:rgba(255,255,255,0.45)}
+.sum-total{display:flex;justify-content:space-between;align-items:center;font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;padding-top:14px;margin-top:6px;border-top:2px solid #F0F0F0;color:#FF5200}
+.dashed-div{border:none;border-top:1.5px dashed #F0F0F0;margin:10px 0}
+.rest-chip{display:inline-flex;align-items:center;gap:7px;background:rgba(232,169,69,0.12);color:#FF5200;border-radius:40px;padding:7px 16px;font-size:.82rem;font-weight:700;margin-bottom:18px}
+/* Empty */
+.empty-state{text-align:center;padding:64px 20px}
+.empty-state .big-emoji{font-size:5.5rem;animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4 rise">
+  <h3 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;font-weight:700;margin:0">{{ t('cart_title') }}</h3>
+  {% if items %}
+  <a href="{{ url_for('clear_cart') }}" onclick="return confirm('Clear all items?')"
+     style="color:#EF4444;font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:5px">
+    <i class="fas fa-trash-alt"></i>{{ t('clear_cart') }}
+  </a>
+  {% endif %}
+</div>
+
+{% if items %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    {% if restaurant %}
+    <div class="rest-chip rise"><i class="fas fa-store"></i>{{ restaurant.name }}</div>
+    {% endif %}
+    {% for item in items %}
+    <div class="cart-item rise">
+      {% if item.image_url %}
+        <img src="{{ item.image_url }}" class="ci-thumb" onerror="this.outerHTML='<div class=ci-thumb-ph>🍽️</div>'"/>
+      {% else %}<div class="ci-thumb-ph">🍽️</div>{% endif %}
+      <div style="flex:1">
+        <div class="ci-name">{{ item.name }}</div>
+        <div class="ci-cat">{{ item.category }}</div>
+      </div>
+      <div class="qty-ctrl">
+        <form method="POST" action="{{ url_for('update_cart') }}" style="display:contents">
+          <input type="hidden" name="item_id" value="{{ item.id }}"/>
+          <button type="submit" name="qty" value="{{ item.qty-1 }}" class="qty-btn">−</button>
+          <span class="qty-num">{{ item.qty }}</span>
+          <button type="submit" name="qty" value="{{ item.qty+1 }}" class="qty-btn">+</button>
+        </form>
+      </div>
+      <div class="ci-price">₹{{ "%.0f"|format(item.subtotal) }}</div>
+      <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" class="rm-btn"><i class="fas fa-times"></i></a>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="col-lg-4">
+    <div class="summary rise-1">
+      <h6 style="font-family:'Clash Display',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:14px">{{ t('order_summary') }}</h6>
+      {% for item in items %}
+      <div class="sum-row">
+        <span>{{ item.name }} ×{{ item.qty }}</span>
+        <strong>₹{{ "%.0f"|format(item.subtotal) }}</strong>
+      </div>
+      {% endfor %}
+      <hr class="dashed-div"/>
+      <div class="sum-row"><span>{{ t('subtotal') }}</span><strong>₹{{ "%.0f"|format(total) }}</strong></div>
+      <div class="sum-row"><span>Delivery</span><strong style="color:#4ade80">{{ t('free') }}</strong></div>
+      <div class="sum-total"><span>{{ t('total') }}</span><span>₹{{ "%.0f"|format(total) }}</span></div>
+      <a href="{{ url_for('checkout') }}" class="btn-z w-100 justify-content-center mt-4" style="padding:14px">
+        Checkout <i class="fas fa-arrow-right"></i>
+      </a>
+      {% if restaurant %}
+      <a href="{{ url_for('restaurant_menu', restaurant_id=restaurant.id) }}" class="btn-z-outline w-100 justify-content-center mt-2" style="padding:11px">
+        <i class="fas fa-plus"></i>Aur items add karo
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="empty-state rise">
+  <div class="big-emoji">🛒</div>
+  <h4 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;margin:20px 0 8px">Cart khaali hai!</h4>
+  <p style="color:rgba(255,255,255,0.45);margin-bottom:24px">Koi restaurant choose karo aur order karo</p>
+  <a href="{{ url_for('restaurants') }}" class="btn-z"><i class="fas fa-store"></i>Restaurants dekho</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ur' else 'ltr' }}">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Register — ZaaQa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--or:#FF5200;--gold:#D4881A;--gold2:#FFD580;--border:#E2DDD8;--muted:#7A8080}
+    html,body{height:100%;font-family:'DM Sans',sans-serif}
+    body{min-height:100vh;display:grid;grid-template-columns:56% 44%;overflow:hidden}
+
+    /*** LEFT — identical to login ***/
+    .left{position:relative;overflow:hidden;min-height:100vh}
+    .left-bg{
+      position:absolute;inset:0;z-index:0;
+      background-image:url("{{ url_for('static', filename='food_hero.jpg') }}");
+      background-size:cover;background-position:right center;
+    }
+    .left-overlay{
+      position:absolute;inset:0;z-index:1;
+      background:
+        linear-gradient(180deg,
+          rgba(10,6,2,0.40) 0%,
+          rgba(10,6,2,0.08) 18%,
+          rgba(10,6,2,0.02) 46%,
+          rgba(10,6,2,0.08) 72%,
+          rgba(10,6,2,0.42) 100%),
+        linear-gradient(90deg, rgba(10,6,2,0.12) 0%, transparent 40%);
+    }
+    .top-stripe{position:absolute;top:0;left:0;right:0;height:3px;z-index:10;
+      background:linear-gradient(90deg,transparent,#c8a84b 20%,#FF5200 50%,#D4881A 78%,transparent)}
+
+    .left-content{
+      position:relative;z-index:10;
+      display:flex;flex-direction:column;justify-content:space-between;
+      height:100%;min-height:100vh;padding:42px 52px;
+    }
+
+    .logo{display:flex;align-items:center;gap:13px}
+    .logo-icon{width:48px;height:48px;background:rgba(255,255,255,0.95);border-radius:14px;
+      display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+      border:1.5px solid rgba(212,136,26,0.55);box-shadow:0 3px 18px rgba(0,0,0,0.3)}
+    .logo-name{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:800;color:#fff;
+      letter-spacing:-0.5px;text-shadow:0 2px 16px rgba(0,0,0,0.6)}
+
+    .hero-pill{
+      display:inline-flex;align-items:center;gap:8px;width:fit-content;margin-bottom:20px;
+      background:rgba(212,136,26,0.18);border:1.5px solid rgba(212,136,26,0.55);
+      color:#FFD580;font-size:.72rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+      padding:7px 20px;border-radius:50px;backdrop-filter:blur(10px);
+    }
+    .hero-h1{font-family:'Playfair Display',serif;font-size:4rem;font-weight:900;color:#fff;
+      line-height:1.0;margin-bottom:14px;text-shadow:0 4px 40px rgba(0,0,0,0.8)}
+    .hero-h1 .italic-gold{color:#FFD580;font-style:italic}
+    .hero-desc{color:rgba(255,255,255,.72);font-size:.93rem;line-height:1.65;
+      margin-bottom:30px;text-shadow:0 1px 10px rgba(0,0,0,0.55);max-width:380px}
+
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{display:flex;align-items:center;gap:9px;
+      background:rgba(0,0,0,0.42);border:1.5px solid rgba(255,255,255,0.20);
+      border-radius:14px;padding:10px 17px;backdrop-filter:blur(16px);transition:.25s;cursor:default}
+    .chip:hover{background:rgba(212,136,26,0.32);border-color:rgba(212,136,26,0.65);transform:translateY(-3px)}
+    .chip-ico{font-size:1.15rem}
+    .chip-txt{display:flex;flex-direction:column;line-height:1.25}
+    .chip-label{font-size:.82rem;font-weight:700;color:#fff}
+    .chip-sub{font-size:.67rem;color:rgba(255,255,255,.58)}
+
+    /*** RIGHT ***/
+    .right{
+      background:#FFFFFF;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      padding:32px 44px;gap:16px;position:relative;
+      height:100vh;overflow-y:auto;overflow-x:hidden;
+    }
+    .right::before{
+      content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+      width:460px;height:280px;border-radius:50%;
+      background:radial-gradient(ellipse,rgba(212,136,26,0.08) 0%,transparent 68%);pointer-events:none
+    }
+
+    /* Corner leaves removed */
+    .clef{display:none!important}
+
+    /* Tagline */
+    .tagline-strip{width:100%;max-width:480px;z-index:1;display:flex;flex-direction:column;gap:9px}
+    .tl-pill{display:inline-flex;align-items:center;gap:7px;width:fit-content;
+      background:linear-gradient(135deg,rgba(212,136,26,0.12),rgba(255,82,0,0.07));
+      border:1.5px solid rgba(212,136,26,0.32);border-radius:50px;padding:5px 15px}
+    .tl-pill span{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+    .tl-h{font-family:'Playfair Display',serif;font-size:1.32rem;font-weight:900;color:#1A1A1A;line-height:1.32}
+    .tl-h em{color:var(--or);font-style:italic}
+    .tl-p{font-size:.96rem;color:var(--muted);line-height:1.65;border-left:2.5px solid rgba(212,136,26,0.42);padding-left:10px}
+    .tl-rule{width:100%;height:1px;background:linear-gradient(90deg,rgba(212,136,26,0.30),rgba(255,82,0,0.16),transparent)}
+
+    /* Form */
+    .form-card{width:100%;max-width:480px;z-index:1}
+    .eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:10px;
+      font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+    .eyebrow::before{content:'';width:22px;height:2px;background:var(--gold);border-radius:2px}
+    .form-card h2{font-family:'Playfair Display',serif;font-size:2rem;color:#1A1A1A;
+      margin-bottom:4px;line-height:1.15;font-weight:900}
+    .form-card .sub{color:var(--muted);font-size:.87rem;margin-bottom:18px;line-height:1.5}
+
+    .fld{position:relative;margin-bottom:11px;isolation:isolate}
+    .fld i{position:absolute;left:14px;top:14px;color:#B8C0BE;font-size:.87rem;z-index:2;pointer-events:none}
+    .fld input,.fld textarea{
+      width:100%;border:1.5px solid var(--border);border-radius:12px;
+      padding:12px 14px 12px 40px;
+      font-family:inherit;font-size:.93rem;background:#F8F5F1;color:#1A1A1A;
+      transition:.2s;outline:none;resize:none;position:relative;z-index:1;
+    }
+    .fld input::placeholder,.fld textarea::placeholder{color:#B8C0BE}
+    .fld input:focus,.fld textarea:focus{border-color:rgba(212,136,26,.58);background:#FFFBF4;box-shadow:0 0 0 4px rgba(212,136,26,.10)}
+
+    .btn-or{
+      width:100%;margin-top:5px;
+      background:linear-gradient(135deg,#FF5200 0%,#FF7A3D 100%);
+      color:#fff;border:none;border-radius:13px;padding:14px;
+      font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      box-shadow:0 6px 22px rgba(255,82,0,.26);transition:.25s;
+    }
+    .btn-or:hover{background:linear-gradient(135deg,#E04500 0%,#FF5200 100%);
+      transform:translateY(-2px);box-shadow:0 12px 30px rgba(255,82,0,.36)}
+    .btn-or i{transition:.25s}.btn-or:hover i{transform:translateX(6px)}
+
+    .divider{display:flex;align-items:center;gap:12px;color:#C4BDB6;font-size:.82rem;margin:14px 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#ECE6DF}
+    .link-row{text-align:center;font-size:.88rem;color:var(--muted)}
+    .link-row a{color:var(--or);font-weight:700;text-decoration:none}
+    .link-row a:hover{color:#D04400}
+
+    .alert{border:none;border-radius:11px;padding:12px 16px;font-size:.87rem;font-weight:500;margin-bottom:14px}
+    .alert-danger{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5}
+    .alert-success{background:#F0FDF4;color:#16A34A;border:1px solid #86EFAC}
+
+    .bottom-strip{width:100%;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px}
+    .sep{width:100%;height:1px;background:#ECE6DF}
+    .lang-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+    .lang-a{display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:50px;
+      border:1.5px solid var(--border);font-size:.77rem;font-weight:600;color:#8A9190;
+      text-decoration:none;background:#F8F5F1;transition:.2s}
+    .lang-a:hover,.lang-a.active{border-color:rgba(212,136,26,.55);color:var(--gold);background:#FFF7E8}
+    .trust{display:flex;align-items:center;justify-content:center;gap:14px}
+    .trust-item{display:flex;align-items:center;gap:6px;font-size:.72rem;color:#9AACAA;font-weight:500}
+    .tdot{width:3px;height:3px;border-radius:50%;background:#D4CCC4}
+
+    @media(max-width:900px){
+      body{grid-template-columns:1fr}.left{min-height:46vh}
+      .left-content{padding:36px 30px}.hero-h1{font-size:2.8rem}.right{padding:36px 28px}
+    }
+    @media(max-width:500px){.left{min-height:40vh}.hero-h1{font-size:2.2rem}.right{padding:28px 16px}}
+    [dir="rtl"] .fld i{left:auto;right:14px}
+    [dir="rtl"] .fld input,[dir="rtl"] .fld textarea{padding:12px 40px 12px 14px}
+  </style>
+</head>
+<body>
+
+<!-- ═══════ LEFT ═══════ -->
+<div class="left">
+  <div class="left-bg"></div>
+  <div class="left-overlay"></div>
+  <div class="top-stripe"></div>
+  <div class="left-content">
+    <div class="logo">
+      <div class="logo-icon">🍽️</div>
+      <span class="logo-name">ZaaQa</span>
+    </div>
+    <div>
+      <div class="hero-pill">🌿 Fresh &amp; Authentic</div>
+      <h1 class="hero-h1">Amritsar Food,<br/><span class="italic-gold">Now Online!</span></h1>
+      <p class="hero-desc">Register free and place your first order today — real Punjabi flavours delivered to your door.</p>
+      <div class="chips">
+        <div class="chip"><span class="chip-ico">⭐</span><div class="chip-txt"><span class="chip-label">Top Rated</span><span class="chip-sub">4.9★ avg rating</span></div></div>
+        <div class="chip"><span class="chip-ico">🚀</span><div class="chip-txt"><span class="chip-label">Fast Delivery</span><span class="chip-sub">Under 30 mins</span></div></div>
+        <div class="chip"><span class="chip-ico">💳</span><div class="chip-txt"><span class="chip-label">Safe Payment</span><span class="chip-sub">100% secure</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ RIGHT ═══════ -->
+<div class="right">
+
+  <!-- Corner leaves (same SVG, CSS flips handle all 4) -->
+  <div class="clef clef-tl">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M6,11 C26,56 76,98 148,114" stroke="rgba(40,95,50,0.18)" stroke-width="1.1" fill="none"/>
+      <path d="M15,6 C42,48 90,84 142,94" stroke="rgba(40,95,50,0.12)" stroke-width="0.9" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,0 C52,65 104,158 86,280" stroke="rgba(55,120,65,0.30)" stroke-width="1.7" fill="none"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <ellipse cx="100" cy="235" rx="23" ry="13" transform="rotate(15 100 235)" fill="rgba(55,120,65,0.14)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+      <circle cx="182" cy="65" r="3.5" fill="rgba(180,90,20,0.24)"/>
+    </svg>
+  </div>
+  <div class="clef clef-tr">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+  <div class="clef clef-bl">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,0 C52,65 104,158 86,280" stroke="rgba(55,120,65,0.30)" stroke-width="1.7" fill="none"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+  <div class="clef clef-br">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M6,11 C26,56 76,98 148,114" stroke="rgba(40,95,50,0.18)" stroke-width="1.1" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+
+  <!-- Tagline -->
+  <div class="tagline-strip">
+    <div class="tl-pill">🍽️ <span>About ZaaQa</span></div>
+    <div class="tl-h">Amritsar ka <em>Zaayqa,</em> Ghar Tak — <em>Seedha &amp; Taza</em></div>
+    <div class="tl-p">ZaaQa brings 25+ authentic Amritsar restaurants to your door — real flavours, real speed, real trust.</div>
+    <div class="tl-rule"></div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-card">
+    <div class="eyebrow">New Here?</div>
+    <h2>{{ t('create_account') }} 🎉</h2>
+    <p class="sub">{{ t('reg_sub') }}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <div class="fld"><i class="fas fa-user"></i><input type="text" name="name" placeholder="{{ t('full_name') }}" required/></div>
+        </div>
+        <div class="col-md-6">
+          <div class="fld"><i class="fas fa-envelope"></i><input type="email" name="email" placeholder="email@example.com" required/></div>
+        </div>
+        <div class="col-md-6">
+          <div class="fld"><i class="fas fa-lock"></i><input type="password" name="password" placeholder="Min 6 characters" minlength="6" required/></div>
+        </div>
+        <div class="col-md-6">
+          <div class="fld"><i class="fas fa-phone"></i><input type="tel" name="phone" placeholder="+91 98765 43210"/></div>
+        </div>
+        <div class="col-12">
+          <div class="fld"><i class="fas fa-map-marker-alt" style="top:14px"></i>
+            <textarea name="address" rows="2" placeholder="{{ t('address') }} — Street, Area, Amritsar" style="padding-top:12px"></textarea>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn-or">{{ t('register_link') }} &nbsp;<i class="fas fa-arrow-right"></i></button>
+    </form>
+    <div class="divider">{{ t('or_text') }}</div>
+    <div class="link-row">{{ t('already_account') }} <a href="/login">{{ t('login_link') }}</a></div>
+  </div>
+
+  <div class="bottom-strip">
+    <div class="sep"></div>
+    <div class="lang-row">
+      {% for code, info in all_langs.items() %}
+      <a href="/set_language/{{ code }}" class="lang-a {% if current_lang==code %}active{% endif %}">{{ info.flag }} {{ info.name }}</a>
+      {% endfor %}
+    </div>
+    <div class="trust">
+      <div class="trust-item"><i class="fas fa-shield-halved" style="color:var(--gold);font-size:.7rem"></i> Secure</div>
+      <div class="tdot"></div>
+      <div class="trust-item"><i class="fas fa-lock" style="color:var(--gold);font-size:.7rem"></i> Encrypted</div>
+      <div class="tdot"></div>
+      <div class="trust-item"><i class="fas fa-star" style="color:var(--gold);font-size:.7rem"></i> 4.9 Rated</div>
+    </div>
+  </div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

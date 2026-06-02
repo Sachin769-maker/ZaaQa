@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}My Orders — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.o-card{background:#1A3530;border-radius:18px;border:1.5px solid rgba(255,255,255,0.10);padding:20px 24px;margin-bottom:14px;transition:.2s}
+.o-card:hover{border-color:rgba(232,169,69,0.35);box-shadow:0 8px 26px rgba(255,82,0,.08)}
+.track-btn{display:inline-flex;align-items:center;gap:6px;color:var(--or);font-weight:700;font-size:.85rem;background:rgba(232,169,69,0.12);border-radius:40px;padding:7px 16px;transition:.2s;text-decoration:none}
+.track-btn:hover{background:var(--or);color:#fff}
+.rev-btn{display:inline-flex;align-items:center;gap:5px;color:#D97706;font-weight:700;font-size:.82rem;background:rgba(251,191,36,0.12);border-radius:40px;padding:6px 14px;transition:.2s;text-decoration:none}
+.rev-btn:hover{background:#F59E0B;color:#fff}
+</style>
+{% endblock %}
+{% block content %}
+<h3 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;margin-bottom:24px" class="rise">My Orders 📋</h3>
+{% if orders %}
+{% for o in orders %}
+<div class="o-card rise">
+  <div class="row align-items-center gy-2">
+    <div class="col-6 col-md-2">
+      <div style="font-family:'Clash Display',sans-serif;font-weight:700">Order #{{ o.id[:8] }}</div>
+      <div style="font-size:.8rem;color:rgba(255,255,255,0.45);margin-top:2px">{{ o.created_at.strftime('%d %b %Y') if o.created_at is not string else o.created_at }}</div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div style="font-size:.75rem;color:rgba(255,255,255,0.45);margin-bottom:2px">Restaurant</div>
+      <div style="font-weight:600;font-size:.9rem">{{ o.restaurant_name }}</div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div style="font-size:.75rem;color:rgba(255,255,255,0.45);margin-bottom:2px">Total</div>
+      <div style="font-family:'Clash Display',sans-serif;font-size:1.1rem;font-weight:700;color:var(--or)">₹{{ o.total_amount|int }}</div>
+    </div>
+    <div class="col-6 col-md-2">
+      <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:40px;font-size:.8rem;font-weight:700;{% if o.status=='Delivered' %}background:rgba(74,222,128,0.12);color:#86EFAC{% elif o.status=='Cancelled' %}background:rgba(248,113,113,0.12);color:#FCA5A5{% else %}background:rgba(96,165,250,0.10);color:#93C5FD{% endif %}">
+        {% if o.status=='Delivered' %}✅{% elif o.status=='Cancelled' %}❌{% else %}🔄{% endif %} {{ o.status }}
+      </span>
+    </div>
+    <div class="col-12 col-md-3 d-flex gap-2 flex-wrap justify-content-md-end">
+      <a href="{{ url_for('order_tracking', order_id=o.id) }}" class="track-btn"><i class="fas fa-location-dot"></i>Track</a>
+      {% if o.status == 'Delivered' %}<a href="{{ url_for('add_review', order_id=o.id) }}" class="rev-btn">⭐ Review</a>{% endif %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5 rise">
+  <div style="font-size:4.5rem;margin-bottom:16px">📋</div>
+  <h5 style="font-family:'Clash Display',sans-serif;font-size:1.4rem">No orders yet</h5>
+  <p style="color:rgba(255,255,255,0.45);margin:8px 0 24px">Place your first order!</p>
+  <a href="{{ url_for('restaurants') }}" class="btn-z"><i class="fas fa-store"></i>Order Now</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.notif-card{background:#1A3530;border-radius:16px;border:1.5px solid rgba(255,255,255,0.10);padding:16px 20px;margin-bottom:10px;transition:.2s;display:flex;gap:14px;align-items:flex-start}
+.notif-card:hover{border-color:rgba(232,169,69,0.35);box-shadow:0 4px 16px rgba(255,82,0,.08)}
+.notif-card.unread{border-left:3px solid var(--or);background:rgba(255,82,0,0.07)}
+.notif-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 rise">
+  <h3 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;margin:0">🔔 Notifications</h3>
+  {% if notifications %}<a href="{{ url_for('mark_all_read') }}" class="btn-z-outline" style="padding:8px 18px;font-size:.85rem">Mark all read</a>{% endif %}
+</div>
+{% if notifications %}
+{% for n in notifications %}
+<div class="notif-card {% if not n.read %}unread{% endif %} rise">
+  <div class="notif-icon" style="background:{% if n.type=='order' %}#FFF0E9{% elif n.type=='success' %}#EDFAF3{% else %}#EFF6FF{% endif %}">
+    {% if n.type=='order' %}🛵{% elif n.type=='success' %}✅{% else %}ℹ️{% endif %}
+  </div>
+  <div style="flex:1">
+    <div style="font-weight:700;font-size:.95rem;margin-bottom:3px">{{ n.title }}</div>
+    <div style="font-size:.88rem;color:#6B6B6B">{{ n.message }}</div>
+    <div style="font-size:.75rem;color:rgba(255,255,255,0.45);margin-top:4px">{{ n.created_at.strftime('%d %b %Y, %I:%M %p') if n.created_at is not string else n.created_at }}</div>
+  </div>
+  {% if not n.read %}<a href="{{ url_for('mark_read', nid=n.id) }}" style="color:rgba(255,255,255,0.45);font-size:.8rem;white-space:nowrap;margin-top:2px">Mark read</a>{% else %}<span style="color:#C8C8C8;font-size:.75rem;margin-top:2px">Read</span>{% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5 rise">
+  <div style="font-size:4rem;margin-bottom:16px">🔔</div>
+  <h5 style="font-family:'Clash Display',sans-serif">No notifications yet</h5>
+  <p style="color:rgba(255,255,255,0.45);margin-top:8px">Place an order to get updates here</p>
+</div>
+{% endif %}
+{% endblock %}

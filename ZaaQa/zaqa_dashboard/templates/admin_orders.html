@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}All Orders — Admin{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-4"><i class="fas fa-receipt me-2" style="color:var(--primary)"></i>All Orders</h3>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr><th>#</th><th>Customer</th><th>Restaurant</th><th>Amount</th><th>Payment</th><th>Date</th><th>Update Status</th></tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td>#{{ o.id }}</td>
+            <td>{{ o.user_name }}</td>
+            <td><small>{{ o.restaurant_name }}</small></td>
+            <td><strong>₹{{ "%.0f"|format(o.total_amount) }}</strong></td>
+            <td><small>{{ o.payment_method }}</small></td>
+            <td><small>{{ o.created_at.strftime('%d %b %Y') if o.created_at is not string else o.created_at }}</small></td>
+            <td>
+              <form method="POST" action="{{ url_for('admin_update_order', order_id=o.id) }}" class="d-flex gap-1">
+                <select name="status" class="form-select form-select-sm" style="width:140px">
+                  {% for s in ['Pending','Confirmed','Preparing','Out for Delivery','Delivered','Cancelled'] %}
+                  <option {% if o.status==s %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-sm btn-primary"><i class="fas fa-save"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

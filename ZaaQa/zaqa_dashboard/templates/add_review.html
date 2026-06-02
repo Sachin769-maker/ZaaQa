@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Add Review — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.star-select{display:flex;gap:8px;flex-direction:row-reverse;justify-content:flex-end}
+.star-select input{display:none}
+.star-select label{font-size:2rem;cursor:pointer;color:#D1D5DB;transition:.15s}
+.star-select label:hover,.star-select label:hover~label,.star-select input:checked~label{color:#F59E0B}
+</style>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="z-card p-4 rise">
+      <a href="{{ url_for('my_orders') }}" style="color:rgba(255,255,255,0.45);font-size:.88rem;display:flex;align-items:center;gap:6px;margin-bottom:20px"><i class="fas fa-arrow-left"></i>Back to Orders</a>
+      <h3 style="font-family:'Clash Display',sans-serif;font-size:1.5rem;margin-bottom:4px">Rate Your Order ⭐</h3>
+      {% if restaurant %}<p style="color:rgba(255,255,255,0.45);margin-bottom:24px">{{ restaurant.name }}</p>{% endif %}
+      <form method="POST">
+        <div class="mb-4">
+          <label style="font-size:.88rem;font-weight:700;color:rgba(255,255,255,0.6);display:block;margin-bottom:12px">Your Rating</label>
+          <div class="star-select">
+            {% for i in [5,4,3,2,1] %}<input type="radio" name="rating" id="s{{ i }}" value="{{ i }}" {% if i==5 %}checked{% endif %}/><label for="s{{ i }}">★</label>{% endfor %}
+          </div>
+        </div>
+        <div class="mb-4">
+          <label style="font-size:.88rem;font-weight:700;color:rgba(255,255,255,0.6);display:block;margin-bottom:8px">Your Review</label>
+          <textarea name="comment" class="form-control" rows="4" placeholder="How was your food?" style="border-radius:13px;border:2px solid rgba(255,255,255,0.10);resize:none;padding:12px"></textarea>
+        </div>
+        <button type="submit" class="btn-z w-100 justify-content-center" style="padding:14px">Submit Review <i class="fas fa-paper-plane ms-1"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

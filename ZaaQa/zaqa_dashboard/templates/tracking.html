@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Track Order #{{ order.id }} — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.track-card{background:#1A3530;border-radius:22px;border:1.5px solid rgba(255,255,255,0.10);padding:32px;margin-bottom:22px}
+/* Steps */
+.steps-wrap{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:0 10px}
+.steps-line{position:absolute;top:22px;left:10%;width:80%;height:3px;background:rgba(255,255,255,0.06);border-radius:4px;z-index:0}
+.steps-progress{position:absolute;top:22px;left:10%;height:3px;background:linear-gradient(90deg,#FF5200,#FF7A3D);border-radius:4px;z-index:1;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+.step{display:flex;flex-direction:column;align-items:center;z-index:2;flex:1}
+.step-dot{
+  width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);
+  background:#1A3530;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;transition:.4s;
+}
+.step.done .step-dot{border-color:#FF5200;background:#FF5200;box-shadow:0 4px 16px rgba(255,82,0,.35)}
+.step.active .step-dot{border-color:#FF5200;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,82,0,.4)}50%{box-shadow:0 0 0 10px rgba(255,82,0,0)}}
+.step-lbl{font-size:.7rem;font-weight:700;margin-top:9px;text-align:center;color:rgba(255,255,255,0.35);max-width:70px}
+.step.done .step-lbl,.step.active .step-lbl{color:#FF5200}
+/* Status badge */
+.main-status{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 20px;border-radius:40px;font-weight:700;font-size:.95rem;
+  margin-top:22px;
+}
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.info-box{background:#162E29;border-radius:13px;padding:14px 16px}
+.info-box label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,0.35);display:block;margin-bottom:4px}
+.info-box p{font-weight:600;font-size:.93rem;margin:0;color:#fff}
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4 rise">
+  <div>
+    <h3 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;margin:0">Order #{{ order.id }}</h3>
+    <p style="color:rgba(255,255,255,0.45);font-size:.88rem;margin:2px 0 0"><i class="fas fa-store me-1"></i>{{ order.restaurant_name }}</p>
+  </div>
+  <a href="{{ url_for('my_orders') }}" class="btn-z-outline btn-sm"><i class="fas fa-arrow-left"></i>Orders</a>
+</div>
+
+{% set statuses=['Pending','Confirmed','Preparing','Out for Delivery','Delivered'] %}
+{% set icons=['🕐','✅','👨‍🍳','🛵','🏠'] %}
+{% set cidx = statuses.index(order.status) if order.status in statuses else 0 %}
+{% set pct  = [0,25,50,75,100][cidx] %}
+
+<!-- Tracker -->
+<div class="track-card rise-1">
+  <div class="steps-wrap">
+    <div class="steps-line"></div>
+    <div class="steps-progress" style="width:{{ pct }}%"></div>
+    {% for i in range(statuses|length) %}
+    <div class="step {% if cidx>i %}done{% elif cidx==i %}active{% endif %}">
+      <div class="step-dot">{{ icons[i] }}</div>
+      <div class="step-lbl">{{ statuses[i] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="text-center">
+    <span class="main-status
+      {% if order.status=='Delivered' %}bg-success text-white
+      {% elif order.status=='Cancelled' %}bg-danger text-white
+      {% elif order.status=='Out for Delivery' %}" style="background:rgba(251,191,36,0.15);color:#FCD34D{% else %}bg-primary text-white{% endif %}">
+      {{ icons[cidx] }} {{ order.status }}
+    </span>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="track-card rise-2" style="padding:0;overflow:hidden">
+      <div style="padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px">
+        <i class="fas fa-receipt" style="color:#FF5200"></i>
+        <span style="font-family:'Clash Display',sans-serif;font-weight:700">Order Items</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#162E29">
+          <th style="padding:11px 20px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,0.45);text-align:left">Item</th>
+          <th style="padding:11px 14px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,0.45);text-align:center">Qty</th>
+          <th style="padding:11px 20px;font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,0.45);text-align:right">Total</th>
+        </tr></thead>
+        <tbody>
+          {% for oi in order_items %}
+          <tr style="border-top:1px solid rgba(255,255,255,0.08)">
+            <td style="padding:12px 20px;font-weight:600;font-size:.92rem">{{ oi.name }}</td>
+            <td style="text-align:center;color:rgba(255,255,255,0.45);font-size:.9rem">{{ oi.quantity }}</td>
+            <td style="text-align:right;padding:12px 20px;font-family:'Clash Display',sans-serif;font-weight:700;color:#FF5200">₹{{ "%.0f"|format(oi.price*oi.quantity) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr style="border-top:2px solid rgba(255,255,255,0.12);background:#162E29">
+            <td colspan="2" style="padding:14px 20px;font-family:'Clash Display',sans-serif;font-weight:700;font-size:1rem;text-align:right">Total</td>
+            <td style="padding:14px 20px;font-family:'Clash Display',sans-serif;font-weight:700;font-size:1.2rem;color:#FF5200;text-align:right">₹{{ "%.0f"|format(order.total_amount) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="track-card rise-3">
+      <div style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px">
+        <i class="fas fa-circle-info" style="color:#FF5200"></i>Order Info
+      </div>
+      <div class="info-grid">
+        <div class="info-box"><label>Payment</label><p>{{ order.payment_method }}</p></div>
+        <div class="info-box"><label>Date</label><p>{{ order.created_at.strftime('%d %b %Y') if order.created_at is not string else order.created_at }}</p></div>
+      </div>
+      <div class="info-box mt-3" style="background:rgba(255,82,0,0.08)">
+        <label>Delivery Address</label>
+        <p style="font-weight:400;font-size:.87rem;color:rgba(255,255,255,0.7);line-height:1.5">{{ order.delivery_address }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function poll(){
+  setTimeout(()=>{
+    fetch('/api/order_status/{{ order.id }}')
+      .then(r=>r.json()).then(d=>{if(d.status)location.reload()}).catch(()=>{});
+    poll();
+  },30000);
+})();
+</script>
+{% endblock %}

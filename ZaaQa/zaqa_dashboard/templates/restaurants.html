@@ -1,0 +1,756 @@
+{% extends 'base.html' %}
+{% block title %}Restaurants — ZaaQa Amritsar{% endblock %}
+{% block extra_css %}
+<style>
+/* ═══ VEG / NON-VEG TOGGLE ═══ */
+.veg-toggle-wrap{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:20px}
+.veg-toggle-label{font-size:.85rem;font-weight:600;color:#6B7280}
+.toggle-track{width:52px;height:28px;border-radius:50px;background:#e5e7eb;position:relative;cursor:pointer;transition:.3s;border:none;padding:0;flex-shrink:0}
+.toggle-track.veg-on{background:#16a34a}
+.toggle-track.nv-on{background:#dc2626}
+.toggle-thumb{width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.toggle-track.veg-on .toggle-thumb,.toggle-track.nv-on .toggle-thumb{left:27px}
+.veg-sign{width:18px;height:18px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.veg-sign.veg{border:2px solid #16a34a}
+.veg-sign.veg::after{content:'';width:8px;height:8px;border-radius:50%;background:#16a34a;display:block}
+.veg-sign.nv{border:2px solid #dc2626}
+.veg-sign.nv::after{content:'';width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #dc2626;display:block;margin-top:1px}
+
+/* ═══ CATEGORY CARDS ═══ */
+.cat-section{margin-bottom:28px}
+.cat-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-card{flex-shrink:0;width:150px;border-radius:0;overflow:visible;cursor:pointer;border:none;transition:.25s;background:transparent;box-shadow:none;display:flex;flex-direction:column;align-items:center;gap:10px}
+.cat-card:hover .cat-card-circle{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.15)}
+.cat-card.active .cat-card-circle{border:3px solid #FF5200;box-shadow:0 6px 20px rgba(255,82,0,.28)}
+.cat-card-circle{width:140px;height:140px;border-radius:50%;overflow:hidden;border:3px solid transparent;transition:.25s;box-shadow:0 2px 10px rgba(0,0,0,.10)}
+.cat-card-img{width:100%;height:100%;object-fit:cover;display:block}
+.cat-card-label{padding:0;text-align:center;font-size:1rem;font-weight:700;color:#1A1A1A;letter-spacing:.1px;line-height:1.3;width:100%}
+
+/* ═══ TRENDING ═══ */
+.trending-section{margin-bottom:28px}
+.trending-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.trending-scroll::-webkit-scrollbar{display:none}
+.tr-card{flex-shrink:0;width:230px;border-radius:16px;overflow:hidden;background:#fff;border:1.5px solid #EDE8E1;box-shadow:0 2px 10px rgba(0,0,0,.06);cursor:pointer;transition:.25s}
+.tr-card:hover{transform:translateY(-5px);box-shadow:0 14px 30px rgba(0,0,0,.12);border-color:rgba(255,82,0,.3)}
+.tr-img{width:100%;height:130px;object-fit:cover;display:block}
+.tr-body{padding:12px 14px 14px}
+.tr-badge{display:inline-flex;align-items:center;gap:4px;background:#fff3e8;color:#FF5200;border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:700;margin-bottom:6px}
+.tr-name{font-size:.95rem;font-weight:700;color:#1A1A1A;margin-bottom:4px}
+.tr-meta{font-size:.78rem;color:#9CA3AF;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tr-rating{display:flex;align-items:center;gap:3px;color:#1A1A1A;font-weight:600;font-size:.8rem}
+
+/* ═══ SEARCH ═══ */
+.search-pill{background:#FFFFFF;border-radius:60px;box-shadow:0 4px 20px rgba(0,0,0,.08);display:flex;align-items:center;gap:4px;padding:6px 6px 6px 20px;margin-bottom:20px;border:1.5px solid #EDE8E1}
+.search-pill input{border:none;outline:none;font-family:inherit;font-size:.95rem;flex:1;background:transparent;color:#1A1A1A}
+.search-pill input::placeholder{color:#B8C0BE}
+.search-pill select{border:none;outline:none;font-family:inherit;font-size:.88rem;color:#6B7280;background:transparent;padding:0 10px;cursor:pointer;border-left:1px solid #EDE8E1}
+.search-pill select option{background:#fff;color:#1A1A1A}
+.search-pill button{background:linear-gradient(135deg,#FF5200,#FF7A3D);color:#fff;border:none;border-radius:50px;padding:10px 26px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;flex-shrink:0;font-family:inherit;box-shadow:0 4px 16px rgba(255,82,0,.35)}
+.search-pill button:hover{background:linear-gradient(135deg,#E04800,#FF5200)}
+
+/* ═══ STATS ═══ */
+.stat-row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.stat-item{display:flex;align-items:center;gap:7px;font-size:.92rem;color:#1A1A1A;font-weight:600}
+.stat-item strong{color:#1A1A1A;font-weight:800}
+.stat-dot{width:8px;height:8px;border-radius:50%;background:#FF5200}
+
+/* ═══ COUPONS ═══ */
+.coupons-section{margin-bottom:32px}
+.sec-title{font-family:'Clash Display',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:16px;color:#1A1A1A;display:flex;align-items:center;gap:9px}
+.coupons-scroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.coupons-scroll::-webkit-scrollbar{display:none}
+.coupon-card{flex-shrink:0;min-width:230px;border-radius:18px;padding:18px 20px 16px;position:relative;overflow:hidden;border:2px dashed rgba(255,82,0,.30);background:#FFFFFF;box-shadow:0 2px 14px rgba(0,0,0,.06);cursor:pointer;transition:.22s}
+.coupon-card:hover{transform:translateY(-5px);box-shadow:0 12px 30px rgba(255,82,0,.13);border-color:#FF5200}
+.coupon-card::before{content:'';position:absolute;top:-28px;right:-28px;width:90px;height:90px;border-radius:50%;background:rgba(255,82,0,.05)}
+.coupon-card::after{content:'';position:absolute;left:-10px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:#F5F2EE}
+.coupon-badge{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#FF5200,#FF7A3D);color:#fff;border-radius:7px;padding:3px 10px;font-size:.7rem;font-weight:800;letter-spacing:.5px;width:fit-content;margin-bottom:6px}
+.coupon-code{font-family:'Clash Display',sans-serif;font-size:1.45rem;font-weight:700;color:#1A1A1A;letter-spacing:1px;margin-bottom:3px}
+.coupon-desc{font-size:.82rem;color:#6B7280;line-height:1.45}
+.coupon-valid{font-size:.73rem;color:#E8A945;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:4px}
+.coupon-scissors{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.2rem;opacity:.18}
+
+/* ═══ FILTER CHIPS ═══ */
+.filter-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;margin-bottom:20px;position:relative}
+.filter-chips::-webkit-scrollbar{display:none}
+.fchip{flex-shrink:0;padding:8px 18px;border-radius:50px;font-size:.85rem;font-weight:600;border:1.5px solid #E5E7EB;background:#fff;color:#1A1A1A;cursor:pointer;transition:.2s;white-space:nowrap;position:relative}
+.fchip:hover{border-color:#FF5200;color:#FF5200;background:#FFF5F0}
+.fchip.active{background:#FF5200;color:#fff;border-color:#FF5200;box-shadow:0 4px 12px rgba(255,82,0,.25)}
+/* Dropdown panel */
+.fchip-panel{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:14px;border:1.5px solid #E5E7EB;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:10px;z-index:999;min-width:180px}
+.fchip-panel.open{display:block}
+.fchip-opt{padding:9px 14px;border-radius:8px;font-size:.85rem;font-weight:500;color:#1A1A1A;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s}
+.fchip-opt:hover{background:#FFF5F0;color:#FF5200}
+.fchip-opt.selected{background:#FFF5F0;color:#FF5200;font-weight:700}
+
+/* Coupon copy btn */
+.coupon-copy-btn{position:absolute;bottom:14px;right:34px;background:#FF5200;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.2s;opacity:0}
+.coupon-card:hover .coupon-copy-btn{opacity:1}
+.coupon-card{position:relative}
+
+/* ═══ RESTAURANT CARDS ═══ */
+.rest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+.r-card{background:#FFFFFF;border-radius:20px;border:1.5px solid #EDE8E1;overflow:hidden;transition:.28s cubic-bezier(.22,1,.36,1);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.r-card:hover{transform:translateY(-7px);box-shadow:0 20px 40px rgba(0,0,0,.12);border-color:rgba(255,82,0,.3)}
+.r-card-img{position:relative;height:175px;overflow:hidden}
+.r-card-img img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.r-card:hover .r-card-img img{transform:scale(1.07)}
+.r-card-img-ph{width:100%;height:175px;background:linear-gradient(135deg,#FFF3E8,#FFE5CC);display:flex;align-items:center;justify-content:center;font-size:3.5rem}
+.r-rating{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-radius:20px;padding:4px 11px;font-size:.75rem;font-weight:700;color:#1A1A1A;box-shadow:0 2px 10px rgba(0,0,0,.12);display:flex;align-items:center;gap:4px}
+.r-time{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:4px 11px;font-size:.74rem;font-weight:600;backdrop-filter:blur(8px)}
+/* Offer badge */
+.r-offer{position:absolute;bottom:12px;left:12px;background:linear-gradient(135deg,#1a56db,#3b82f6);color:#fff;border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:700;display:flex;align-items:center;gap:4px}
+/* Open/Closed status */
+.r-status{position:absolute;top:12px;right:12px;border-radius:20px;padding:3px 10px;font-size:.68rem;font-weight:700}
+.r-status.open{background:rgba(22,163,74,.15);color:#16a34a;border:1px solid rgba(22,163,74,.3)}
+.r-status.closed{background:rgba(239,68,68,.12);color:#dc2626;border:1px solid rgba(239,68,68,.25)}
+.r-body{padding:16px 18px 18px}
+.r-name{font-family:'Clash Display',sans-serif;font-size:1.05rem;font-weight:700;color:#1A1A1A;margin-bottom:2px}
+.r-cuisine{font-size:.8rem;color:#9CA3AF;margin-bottom:12px}
+.r-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px dashed #EDE8E1}
+.r-area{font-size:.8rem;color:#9CA3AF;display:flex;align-items:center;gap:5px}
+.r-min{font-size:.8rem;color:#9CA3AF}
+.r-dist{font-size:.78rem;color:#9CA3AF;display:flex;align-items:center;gap:3px}
+/* ═══ TOAST ═══ */
+.zq-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A1A;color:#fff;padding:12px 24px;border-radius:50px;font-size:.9rem;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.zq-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.zq-toast .tick{color:#4ade80;font-size:1.1rem}
+.coupon-card.copied{border-color:#4ade80!important;background:#f0fdf4!important}
+.coupon-card.copied .coupon-code{color:#16a34a!important}
+.r-card.hidden{display:none}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- ═══ VEG / NON-VEG TOGGLE ═══ -->
+<div class="veg-toggle-wrap rise">
+  <div class="veg-sign veg"></div>
+  <span class="veg-toggle-label" id="toggleLabel">Veg Only</span>
+  <button class="toggle-track" id="vegToggle" onclick="switchVegMode()">
+    <div class="toggle-thumb"></div>
+  </button>
+  <div class="veg-sign nv"></div>
+  <span class="veg-toggle-label" id="nvLabel" style="color:#dc2626;display:none">Non-Veg</span>
+</div>
+
+<!-- ═══ CATEGORY CARDS ═══ -->
+<div class="cat-section rise">
+  <div class="cat-scroll" id="catScroll">
+    <div class="cat-card veg-cat active" data-cat="all" onclick="filterCat(this,'all')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide3.png') }}" alt="All"/></div>
+      <div class="cat-card-label">🍽️ All</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="pizza" onclick="filterCat(this,'pizza')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide1.png') }}" alt="Pizza"/></div>
+      <div class="cat-card-label">🍕 Pizza</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="south" onclick="filterCat(this,'south')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide2.png') }}" alt="South Indian"/></div>
+      <div class="cat-card-label">🥞 South Indian</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="north" onclick="filterCat(this,'north')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide3.png') }}" alt="North Indian"/></div>
+      <div class="cat-card-label">🍛 North Indian</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="chaat" onclick="filterCat(this,'chaat')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide6.png') }}" alt="Chaat"/></div>
+      <div class="cat-card-label">🌮 Chaat & Snacks</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="beverages" onclick="filterCat(this,'beverages')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide7.png') }}" alt="Beverages"/></div>
+      <div class="cat-card-label">🥤 Beverages</div>
+    </div>
+    <div class="cat-card veg-cat" data-cat="desserts" onclick="filterCat(this,'desserts')">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='slide8.png') }}" alt="Desserts"/></div>
+      <div class="cat-card-label">🍫 Desserts</div>
+    </div>
+
+    <!-- NON-VEG categories -->
+    <div class="cat-card nv-cat" data-cat="biryani" onclick="filterCat(this,'biryani')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_biryani.png') }}" alt="Biryani"/></div>
+      <div class="cat-card-label">🍗 Biryani</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="curry" onclick="filterCat(this,'curry')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_butter_chicken.png') }}" alt="Butter Chicken"/></div>
+      <div class="cat-card-label">🍛 Butter Chicken</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="kebab" onclick="filterCat(this,'kebab')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_kebab.png') }}" alt="Kebabs"/></div>
+      <div class="cat-card-label">🔥 Kebabs & Grill</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="seafood" onclick="filterCat(this,'seafood')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_seafood.png') }}" alt="Seafood"/></div>
+      <div class="cat-card-label">🦐 Seafood</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="eggs" onclick="filterCat(this,'eggs')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_eggs.png') }}" alt="Eggs"/></div>
+      <div class="cat-card-label">🍳 Egg Dishes</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="nvpizza" onclick="filterCat(this,'nvpizza')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_chicken_pizza.png') }}" alt="Chicken Pizza"/></div>
+      <div class="cat-card-label">🍕 Chicken Pizza</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="wrap" onclick="filterCat(this,'wrap')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_wrap.png') }}" alt="Wraps"/></div>
+      <div class="cat-card-label">🌯 Wraps & Rolls</div>
+    </div>
+    <div class="cat-card nv-cat" data-cat="burger" onclick="filterCat(this,'burger')" style="display:none">
+      <div class="cat-card-circle"><img class="cat-card-img" src="{{ url_for('static', filename='nv_burger.png') }}" alt="Burgers"/></div>
+      <div class="cat-card-label">🍔 NV Burger</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ SEARCH ═══ -->
+<div class="search-pill rise-1">
+  <i class="fas fa-search" style="color:#B8C0BE;flex-shrink:0"></i>
+  <form method="GET" style="display:contents">
+    <input type="text" name="search" placeholder="{{ t('search_placeholder') }}" value="{{ search }}"/>
+    <select name="area">
+      <option value="">{{ t('all_amritsar') }}</option>
+      {% for a in areas %}
+      <option value="{{ a }}" {% if selected_area==a %}selected{% endif %}>{{ a }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit"><i class="fas fa-search me-1"></i>{{ t('search_btn') }}</button>
+  </form>
+</div>
+
+<!-- ═══ STATS ═══ -->
+<div class="stat-row rise-2">
+  <div class="stat-item"><span class="stat-dot"></span><strong>{{ restaurants|length }}</strong> restaurants</div>
+  <div class="stat-item"><span class="stat-dot"></span>Delivery in <strong>15–50 min</strong></div>
+  <div class="stat-item"><span class="stat-dot" style="background:#F6AD55"></span><strong>Free</strong> delivery</div>
+  <div class="stat-item"><span class="stat-dot" style="background:#48BB78"></span><strong>Safe</strong> payment</div>
+</div>
+
+<!-- ═══ FILTER CHIPS ═══ -->
+<div class="filter-chips rise-2" id="filterChipsWrap">
+  <button class="fchip active" onclick="filterChip(this,'all')">🍽️ All</button>
+
+  <div style="position:relative;flex-shrink:0">
+    <button class="fchip" onclick="togglePanel('offersPanel',this)">🏷️ Offers ▾</button>
+    <div class="fchip-panel" id="offersPanel">
+      <div class="fchip-opt" onclick="selectOpt(this,'offers','50% off')">🔥 50% Off</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'offers','30% off')">🎯 30% Off</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'offers','20% off')">✨ 20% Off</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'offers','free delivery')">🆓 Free Delivery</div>
+    </div>
+  </div>
+
+  <div style="position:relative;flex-shrink:0">
+    <button class="fchip" onclick="togglePanel('ratingPanel',this)">⭐ Rating ▾</button>
+    <div class="fchip-panel" id="ratingPanel">
+      <div class="fchip-opt" onclick="selectOpt(this,'rating','4.5')">⭐ 4.5+</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'rating','4.0')">⭐ 4.0+</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'rating','3.5')">⭐ 3.5+</div>
+    </div>
+  </div>
+
+  <div style="position:relative;flex-shrink:0">
+    <button class="fchip" onclick="togglePanel('delivPanel',this)">⚡ Delivery Time ▾</button>
+    <div class="fchip-panel" id="delivPanel">
+      <div class="fchip-opt" onclick="selectOpt(this,'delivery','15')">⚡ Under 15 min</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'delivery','30')">🕐 Under 30 min</div>
+      <div class="fchip-opt" onclick="selectOpt(this,'delivery','45')">🕐 Under 45 min</div>
+    </div>
+  </div>
+
+  <button class="fchip" onclick="filterChip(this,'open')">🟢 Open Now</button>
+  <button class="fchip" onclick="filterChip(this,'nearby')">📍 Nearby</button>
+</div>
+
+<!-- ═══ TRENDING RESTAURANTS ═══ -->
+<div class="trending-section rise-2">
+  <p class="sec-title">🔥 Trending Restaurants</p>
+
+  <!-- VEG TRENDING -->
+  <div id="vegTrending">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:18px;height:18px;border:2.5px solid #16a34a;border-radius:3px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <div style="width:9px;height:9px;border-radius:50%;background:#16a34a"></div>
+      </div>
+      <span style="font-size:.82rem;font-weight:600;color:#16a34a">Veg Restaurants</span>
+    </div>
+    <div class="trending-scroll">
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide3.png') }}" alt="Kesar Da Dhaba"/>
+        <div class="tr-body">
+          <div class="tr-badge">🔥 #1 Trending</div>
+          <div class="tr-name">Kesar Da Dhaba</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.9</span>
+            <span>·</span><span>Punjabi</span><span>·</span><span>25 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide4.png') }}" alt="Bhrawan Daa Dhaba"/>
+        <div class="tr-body">
+          <div class="tr-badge">⭐ Fan Favourite</div>
+          <div class="tr-name">Bhrawan Daa Dhaba</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.8</span>
+            <span>·</span><span>North Indian</span><span>·</span><span>30 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide5.png') }}" alt="Brothers Dhaba"/>
+        <div class="tr-body">
+          <div class="tr-badge">🏆 Most Ordered</div>
+          <div class="tr-name">Brothers Dhaba</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.7</span>
+            <span>·</span><span>Punjabi</span><span>·</span><span>20 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide6.png') }}" alt="Spicy Hut"/>
+        <div class="tr-body">
+          <div class="tr-badge">🌶️ Spicy Pick</div>
+          <div class="tr-name">Spicy Hut</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.6</span>
+            <span>·</span><span>Chaat &amp; Snacks</span><span>·</span><span>15 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide7.png') }}" alt="Kanha Sweets"/>
+        <div class="tr-body">
+          <div class="tr-badge">🍬 Sweet Spot</div>
+          <div class="tr-name">Kanha Sweets</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.7</span>
+            <span>·</span><span>Sweets & Snacks</span><span>·</span><span>20 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='slide8.png') }}" alt="Ahuja Milk Bhandaar"/>
+        <div class="tr-body">
+          <div class="tr-badge">🥛 Amritsar Classic</div>
+          <div class="tr-name">Ahuja Milk Bhandaar</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.8</span>
+            <span>·</span><span>Beverages & Sweets</span><span>·</span><span>10 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="nvTrending" style="display:none;margin-top:4px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <div style="width:18px;height:18px;border:2.5px solid #dc2626;border-radius:3px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #dc2626;margin-top:1px"></div>
+      </div>
+      <span style="font-size:.82rem;font-weight:600;color:#dc2626">Non-Veg Restaurants</span>
+    </div>
+    <div class="trending-scroll">
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='nv_biryani.png') }}" alt="Pal Dhaba"/>
+        <div class="tr-body">
+          <div class="tr-badge">🔥 #1 NV Pick</div>
+          <div class="tr-name">Pal Dhaba</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.8</span>
+            <span>·</span><span>Biryani</span><span>·</span><span>35 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='nv_butter_chicken.png') }}" alt="Beera Chicken"/>
+        <div class="tr-body">
+          <div class="tr-badge">⭐ Most Loved</div>
+          <div class="tr-name">Beera Chicken</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.7</span>
+            <span>·</span><span>Butter Chicken</span><span>·</span><span>30 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='nv_kebab.png') }}" alt="Surjit Food Plaza"/>
+        <div class="tr-body">
+          <div class="tr-badge">🏆 Top Rated</div>
+          <div class="tr-name">Surjit Food Plaza</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.6</span>
+            <span>·</span><span>Kebabs &amp; Grill</span><span>·</span><span>25 min</span>
+          </div>
+        </div>
+      </div>
+      <div class="tr-card">
+        <img class="tr-img" src="{{ url_for('static', filename='nv_chicken_pizza.png') }}" alt="Makhan Fish &amp; Chicken"/>
+        <div class="tr-body">
+          <div class="tr-badge">🌶️ Street King</div>
+          <div class="tr-name">Makhan Fish &amp; Chicken</div>
+          <div class="tr-meta">
+            <span class="tr-rating"><i class="fas fa-star" style="color:#F6AD55;font-size:.65rem"></i> 4.5</span>
+            <span>·</span><span>Seafood</span><span>·</span><span>20 min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COUPONS ═══ -->
+<div class="coupons-section rise-2">
+  <p class="sec-title">🎟️ Exclusive Offers &amp; Coupons</p>
+  <div class="coupons-scroll">
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">🔥 HOT DEAL</div>
+      <div class="coupon-code" data-code="ZAAQ50">ZAAQ50</div>
+      <div class="coupon-desc">50% off on your first order — min ₹199</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Valid till 31 May 2026</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">🆓 FREE</div>
+      <div class="coupon-code" data-code="FREEDEL">FREEDEL</div>
+      <div class="coupon-desc">Free delivery on all orders above ₹149</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Valid till 30 Jun 2026</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">🍛 PUNJABI</div>
+      <div class="coupon-code" data-code="AMRITSAR30">AMRITSAR30</div>
+      <div class="coupon-desc">30% off on all Punjabi cuisine restaurants</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Valid till 15 Jun 2026</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">🌙 NIGHT</div>
+      <div class="coupon-code" data-code="LATE20">LATE20</div>
+      <div class="coupon-desc">20% off on orders placed after 9 PM</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Everyday • 9 PM – 12 AM</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">👨‍👩‍👧 FAMILY</div>
+      <div class="coupon-code" data-code="FAM25">FAM25</div>
+      <div class="coupon-desc">25% off on orders above ₹499 — family feasts!</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Valid till 20 Jun 2026</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+    <div class="coupon-card" onclick="copyCoupon(this)">
+      <div class="coupon-badge">⚡ FLASH</div>
+      <div class="coupon-code" data-code="FLASH15">FLASH15</div>
+      <div class="coupon-desc">Flat ₹15 off on weekend orders — Sat &amp; Sun</div>
+      <div class="coupon-valid"><i class="fas fa-clock"></i> Every Weekend</div>
+      <button class="coupon-copy-btn" onclick="event.stopPropagation();copyCoupon(this.closest('.coupon-card'))"><i class="fas fa-copy"></i> Copy</button>
+      <span class="coupon-scissors">✂️</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESTAURANTS ═══ -->
+{% if restaurants %}
+<p class="sec-title rise-3">
+  {% if search or selected_area %}🔍 Search Results ({{ restaurants|length }}){% else %}{{ t('all_restaurants') }} 🏪{% endif %}
+</p>
+
+<!-- Non-Veg Restaurants Grid (shown only when not searching) -->
+{% if not search and not selected_area %}
+{% set nv_keywords = ['non veg','chicken','mutton','seafood','biryani','butter chicken','kebab','fish','egg','bbq','tandoori'] %}
+{% set nv_restaurants = [] %}
+{% for r in restaurants %}
+  {% set cuisine_lower = r.cuisine|lower %}
+  {% set is_nv = namespace(val=false) %}
+  {% for kw in nv_keywords %}
+    {% if kw in cuisine_lower %}{% set is_nv.val = true %}{% endif %}
+  {% endfor %}
+  {% if is_nv.val %}{% set _ = nv_restaurants.append(r) %}{% endif %}
+{% endfor %}
+{% if nv_restaurants %}
+<div id="nvRestaurantsSection" style="display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;margin-top:4px">
+    <div style="width:18px;height:18px;border:2.5px solid #dc2626;border-radius:3px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #dc2626;margin-top:1px"></div>
+    </div>
+    <span style="font-size:1rem;font-weight:700;color:#dc2626;font-family:'Clash Display',sans-serif">Non-Veg Restaurants</span>
+    <span style="font-size:.8rem;color:#9CA3AF;font-weight:500">({{ nv_restaurants|length }})</span>
+  </div>
+  <div class="rest-grid rise-3">
+    {% for r in nv_restaurants %}
+    {% set offers = ['FLAT 20% OFF','FLAT 10% OFF','FREE DELIVERY','50% OFF','30% OFF'] %}
+    {% set distances = ['0.8 km','1.2 km','1.5 km','2.1 km','2.8 km','3.2 km','0.5 km'] %}
+    {% set statuses = ['open','open','open','closed','open','open'] %}
+    {% set r_offer = offers[loop.index0 % offers|length] %}
+    {% set r_dist = distances[loop.index0 % distances|length] %}
+    {% set r_status = statuses[loop.index0 % statuses|length] %}
+    <a href="{{ url_for('restaurant_menu', restaurant_id=r.id) }}" style="text-decoration:none"
+       data-cuisine="{{ r.cuisine|lower }}"
+       data-type="nonveg"
+       data-rating="{{ r.rating }}"
+       data-status="{{ r_status }}">
+      <div class="r-card">
+        <div class="r-card-img">
+          {% if r.image_url %}
+            <img src="{{ r.image_url }}" alt="{{ r.name }}" onerror="this.parentElement.innerHTML='<div class=r-card-img-ph>🏪</div>'"/>
+          {% else %}
+            <div class="r-card-img-ph">🏪</div>
+          {% endif %}
+          <div class="r-rating"><i class="fas fa-star" style="color:#F6AD55"></i>{{ r.rating }}</div>
+          <div class="r-time"><i class="fas fa-clock me-1"></i>{{ r.delivery_time }}</div>
+          <div class="r-offer"><i class="fas fa-tag" style="font-size:.6rem"></i> {{ r_offer }}</div>
+          <div class="r-status {{ r_status }}">{% if r_status == 'open' %}● Open{% else %}● Closed{% endif %}</div>
+          <!-- Non-Veg sign -->
+          <div style="position:absolute;top:40px;right:12px;width:18px;height:18px;border:2.5px solid #dc2626;border-radius:3px;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;">
+            <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #dc2626;margin-top:2px"></div>
+          </div>
+        </div>
+        <div class="r-body">
+          <div class="r-name">{{ r.name }}</div>
+          <div class="r-cuisine">{{ r.cuisine }}</div>
+          <div class="r-footer">
+            <span class="r-area"><i class="fas fa-location-dot" style="color:#FF5200"></i>{{ r.area }}</span>
+            <span class="r-dist"><i class="fas fa-route" style="color:#9CA3AF;font-size:.65rem"></i>{{ r_dist }}</span>
+            <span class="r-min">{% if r.min_order > 0 %}Min ₹{{ r.min_order|int }}{% else %}No min{% endif %}</span>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <div style="height:1px;background:#F3F4F6;margin:24px 0"></div>
+</div>
+{% endif %}
+{% endif %}
+<div class="rest-grid rise-3">
+  {% for r in restaurants %}
+  {% set offers = ['FLAT 20% OFF','FLAT 10% OFF','FREE DELIVERY','50% OFF','30% OFF'] %}
+  {% set distances = ['0.8 km','1.2 km','1.5 km','2.1 km','2.8 km','3.2 km','0.5 km'] %}
+  {% set statuses = ['open','open','open','closed','open','open'] %}
+  {% set r_offer = offers[loop.index0 % offers|length] %}
+  {% set r_dist = distances[loop.index0 % distances|length] %}
+  {% set r_status = statuses[loop.index0 % statuses|length] %}
+  <a href="{{ url_for('restaurant_menu', restaurant_id=r.id) }}" style="text-decoration:none"
+     data-cuisine="{{ r.cuisine|lower }}"
+     data-type="{{ 'nonveg' if r.cuisine|lower in ['non-veg','chicken','mutton','seafood','biryani','butter chicken','kebab','fish','egg','non veg'] else 'veg' }}"
+     data-rating="{{ r.rating }}"
+     data-status="{{ r_status }}">
+    <div class="r-card">
+      <div class="r-card-img">
+        {% if r.image_url %}
+          <img src="{{ r.image_url }}" alt="{{ r.name }}" onerror="this.parentElement.innerHTML='<div class=r-card-img-ph>🏪</div>'"/>
+        {% else %}
+          <div class="r-card-img-ph">🏪</div>
+        {% endif %}
+        <div class="r-rating"><i class="fas fa-star" style="color:#F6AD55"></i>{{ r.rating }}</div>
+        <div class="r-time"><i class="fas fa-clock me-1"></i>{{ r.delivery_time }}</div>
+        <!-- Offer badge -->
+        <div class="r-offer"><i class="fas fa-tag" style="font-size:.6rem"></i> {{ r_offer }}</div>
+        <!-- Open/Closed -->
+        <div class="r-status {{ r_status }}">{% if r_status == 'open' %}● Open{% else %}● Closed{% endif %}</div>
+        <!-- Veg/Non-Veg sign -->
+        {% if r.cuisine|lower in ['non-veg','chicken','mutton','seafood','biryani','butter chicken','kebab','fish','egg','non veg'] %}
+        <div style="position:absolute;top:40px;right:12px;width:18px;height:18px;border:2.5px solid #dc2626;border-radius:3px;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;">
+          <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid #dc2626;margin-top:2px"></div>
+        </div>
+        {% else %}
+        <div style="position:absolute;top:40px;right:12px;width:18px;height:18px;border:2.5px solid #16a34a;border-radius:3px;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;">
+          <div style="width:9px;height:9px;border-radius:50%;background:#16a34a"></div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="r-body">
+        <div class="r-name">{{ r.name }}</div>
+        <div class="r-cuisine">{{ r.cuisine }}</div>
+        <div class="r-footer">
+          <span class="r-area"><i class="fas fa-location-dot" style="color:#FF5200"></i>{{ r.area }}</span>
+          <span class="r-dist"><i class="fas fa-route" style="color:#9CA3AF;font-size:.65rem"></i>{{ r_dist }}</span>
+          <span class="r-min">{% if r.min_order > 0 %}Min ₹{{ r.min_order|int }}{% else %}No min{% endif %}</span>
+        </div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 rise-3">
+  <div style="font-size:4.5rem;margin-bottom:16px">🔍</div>
+  <h5 style="font-family:'Clash Display',sans-serif;font-size:1.4rem;color:#1A1A1A">No restaurants found</h5>
+  <p style="color:#9CA3AF;margin:8px 0 20px">Try changing filters or reset to see all restaurants</p>
+  <a href="{{ url_for('restaurants') }}" class="btn-z">Reset Filters</a>
+</div>
+{% endif %}
+{% endblock %}
+
+<!-- Toast -->
+<div class="zq-toast" id="zqToast"><span class="tick">✓</span> <span id="zqToastMsg">Code Copied!</span></div>
+
+{% block extra_js %}
+<script>
+  // ═══ FILTER CHIPS DROPDOWN ═══
+  function togglePanel(id, btn) {
+    var panel = document.getElementById(id);
+    var allPanels = document.querySelectorAll('.fchip-panel');
+    allPanels.forEach(function(p){ if(p.id !== id) p.classList.remove('open'); });
+    panel.classList.toggle('open');
+    event.stopPropagation();
+  }
+  function selectOpt(el, type, val) {
+    var panel = el.closest('.fchip-panel');
+    panel.querySelectorAll('.fchip-opt').forEach(function(o){ o.classList.remove('selected'); });
+    el.classList.add('selected');
+    var btn = panel.previousElementSibling;
+    btn.classList.add('active');
+    panel.classList.remove('open');
+    // Apply filter
+    var cards = document.querySelectorAll('.rest-grid a');
+    cards.forEach(function(card){
+      var rating = parseFloat(card.getAttribute('data-rating') || 0);
+      var show = true;
+      if (type === 'rating') show = rating >= parseFloat(val);
+      card.style.display = show ? '' : 'none';
+    });
+    scrollToRestaurants();
+  }
+  // Close panels on outside click
+  document.addEventListener('click', function(){ document.querySelectorAll('.fchip-panel').forEach(function(p){ p.classList.remove('open'); }); });
+
+  // ═══ SCROLL TO RESTAURANTS ═══
+  function scrollToRestaurants() {
+    var el = document.querySelector('.rest-grid');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // ═══ FILTER CHIPS ═══
+  function filterChip(el, type) {
+    document.querySelectorAll('.fchip').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+    var cards = document.querySelectorAll('.rest-grid a');
+    cards.forEach(function(card) {
+      var rating  = parseFloat(card.getAttribute('data-rating') || 0);
+      var status  = card.getAttribute('data-status') || 'open';
+      var show = true;
+      if (type === 'rating')  show = rating >= 4.5;
+      else if (type === 'open') show = status === 'open';
+      card.style.display = show ? '' : 'none';
+    });
+    scrollToRestaurants();
+  }
+
+  // ═══ VEG / NON-VEG STATE ═══
+  var isNonVeg = false;
+  var activeCat = 'all';
+
+  function switchVegMode() {
+    isNonVeg = !isNonVeg;
+    var toggle = document.getElementById('vegToggle');
+    var label  = document.getElementById('toggleLabel');
+
+    if (isNonVeg) {
+      toggle.classList.remove('veg-on');
+      toggle.classList.add('nv-on');
+      label.textContent = 'Non-Veg';
+      label.style.color = '#dc2626';
+      document.querySelectorAll('.veg-cat').forEach(function(c){ c.style.display='none'; });
+      document.querySelectorAll('.nv-cat').forEach(function(c){ c.style.display='block'; });
+      // trending swap
+      document.getElementById('vegTrending').style.display = 'none';
+      document.getElementById('nvTrending').style.display  = 'block';
+      // show NV restaurants section
+      var nvSec = document.getElementById('nvRestaurantsSection');
+      if(nvSec) nvSec.style.display = 'block';
+    } else {
+      toggle.classList.remove('nv-on');
+      toggle.classList.add('veg-on');
+      label.textContent = 'Veg Only';
+      label.style.color = '#16a34a';
+      document.querySelectorAll('.nv-cat').forEach(function(c){ c.style.display='none'; });
+      document.querySelectorAll('.veg-cat').forEach(function(c){ c.style.display='block'; });
+      // trending swap
+      document.getElementById('vegTrending').style.display = 'block';
+      document.getElementById('nvTrending').style.display  = 'none';
+      // hide NV restaurants section
+      var nvSec = document.getElementById('nvRestaurantsSection');
+      if(nvSec) nvSec.style.display = 'none';
+    }
+    activeCat = 'all';
+    document.querySelectorAll('.cat-card').forEach(function(c){ c.classList.remove('active'); });
+    var allCard = document.querySelector('.cat-card[data-cat="all"]');
+    if(allCard) allCard.classList.add('active');
+    applyFilters();
+  }
+
+  // ═══ CATEGORY FILTER ═══
+  function filterCat(el, cat) {
+    activeCat = cat;
+    document.querySelectorAll('.cat-card').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+    applyFilters();
+    // Scroll to restaurants section smoothly
+    setTimeout(function(){
+      var restSection = document.querySelector('.rest-grid');
+      if(restSection) restSection.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 100);
+  }
+
+  function applyFilters() {
+    var cards = document.querySelectorAll('.rest-grid a');
+    cards.forEach(function(card) {
+      var cuisine = (card.getAttribute('data-cuisine') || '').toLowerCase();
+      var type    = card.getAttribute('data-type') || 'veg';
+
+      // Veg/NonVeg filter
+      var typeMatch = isNonVeg ? (type === 'nonveg') : (type === 'veg');
+
+      // Category filter
+      var catMatch = true;
+      if (activeCat !== 'all') {
+        var catMap = {
+          'pizza':     ['pizza'],
+          'south':     ['south indian','dosa','idli','udupi'],
+          'north':     ['north indian','punjabi','thali','dhaba'],
+          'chaat':     ['chaat','snack','samosa','street'],
+          'beverages': ['juice','lassi','beverage','drink','shake'],
+          'desserts':  ['dessert','ice cream','sweet','bakery'],
+          'biryani':   ['biryani'],
+          'curry':     ['butter chicken','curry','murg'],
+          'kebab':     ['kebab','tandoor','grill','bbq'],
+          'seafood':   ['seafood','fish','prawn','shrimp'],
+          'eggs':      ['egg','omelette','bhurji'],
+          'nvpizza':   ['chicken pizza','pizza'],
+          'wrap':      ['wrap','roll','kathi'],
+          'burger':    ['burger']
+        };
+        var keywords = catMap[activeCat] || [];
+        catMatch = keywords.some(function(kw){ return cuisine.includes(kw); });
+        if (!catMatch && activeCat !== 'all') catMatch = false;
+      }
+
+      card.style.display = (typeMatch && catMatch) ? '' : 'none';
+    });
+  }
+
+  // Init veg mode on load
+  document.getElementById('vegToggle').classList.add('veg-on');
+  applyFilters();
+
+  // ═══ COPY COUPON ═══
+  function copyCoupon(card) {
+    var codeEl = card.querySelector("[data-code]");
+    if (!codeEl) return;
+    var code = codeEl.getAttribute("data-code");
+    navigator.clipboard.writeText(code).then(function() {
+      card.classList.add("copied");
+      setTimeout(function(){ card.classList.remove("copied"); }, 1800);
+      document.getElementById("zqToastMsg").textContent = "\u201C" + code + "\u201D Copied!";
+      var t = document.getElementById("zqToast");
+      t.classList.add("show");
+      setTimeout(function(){ t.classList.remove("show"); }, 2200);
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ur' else 'ltr' }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}ZaaQa — Amritsar Food Delivery{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --or: #FF5200;
+      --or2: #FF7A3D;
+      --primary: #FF5200;
+      --gold: #E8A945;
+      --dark: #1A1A1A;
+      --dark-mid: #FFFFFF;
+      --dark-card: #FFFFFF;
+      --dark-card2: #F8F5F1;
+      --txt: #1A1A1A;
+      --txt-muted: rgba(30,30,30,0.55);
+      --muted: rgba(0,0,0,0.35);
+      --bg: #F5F2EE;
+      --white: #FFFFFF;
+      --border: rgba(0,0,0,0.10);
+      --sh: 0 2px 20px rgba(0,0,0,.08);
+      --r: 18px
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      overflow-x: hidden
+    }
+
+    a {
+      text-decoration: none
+    }
+
+    .navbar {
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid #E5E0D8;
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: box-shadow .3s
+    }
+
+    .navbar.scrolled {
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .3)
+    }
+
+    .zaaq-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: rgba(232,169,69,0.18);
+      border: 1.5px solid rgba(232,169,69,0.42);
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+      position: relative;
+      overflow: hidden;
+      transition: .2s;
+      flex-shrink: 0
+    }
+
+    .logo-mark::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .12) 0%, transparent 60%)
+    }
+
+    .zaaq-logo:hover .logo-mark {
+      transform: rotate(-5deg) scale(1.05);
+      background: rgba(232,169,69,0.28)
+    }
+
+    .logo-text {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      color: #1A1A1A
+    }
+
+    .logo-text em {
+      font-style: normal;
+      color: var(--gold)
+    }
+
+    .nav-pill {
+      color: #4B5563;
+      font-weight: 600;
+      font-size: .88rem;
+      padding: 7px 15px;
+      border-radius: 40px;
+      transition: .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .nav-pill:hover {
+      background: rgba(232,169,69,0.12);
+      color: var(--gold)
+    }
+
+    .cart-pill {
+      background: linear-gradient(135deg, var(--or), var(--or2));
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: .88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: .25s;
+      box-shadow: 0 4px 16px rgba(255, 82, 0, .4)
+    }
+
+    .cart-pill:hover {
+      background: linear-gradient(135deg, #E04800, var(--or));
+      transform: translateY(-2px);
+      color: #1A1A1A
+    }
+
+    .cart-bubble {
+      background: #fff;
+      color: var(--or);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: .68rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .notif-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #F3F0EB;
+      border: 1.5px solid #E5E0D8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6B7280;
+      transition: .2s;
+      cursor: pointer
+    }
+
+    .notif-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(232,169,69,0.1)
+    }
+
+    .notif-dot {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 10px;
+      height: 10px;
+      background: var(--or);
+      border-radius: 50%;
+      border: 2px solid #fff;
+      animation: ping 1.5s infinite
+    }
+
+    @keyframes ping {
+      0% {
+        box-shadow: 0 0 0 0 rgba(255, 82, 0, .4)
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(255, 82, 0, 0)
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 82, 0, 0)
+      }
+    }
+
+    .lang-switcher {
+      position: relative
+    }
+
+    .lang-btn {
+      background: #F3F0EB;
+      border: 1.5px solid #E5E0D8;
+      border-radius: 40px;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .2s;
+      color: rgba(255,255,255,0.65)
+    }
+
+    .lang-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold)
+    }
+
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #FFFFFF;
+      border-radius: 16px;
+      border: 1.5px solid #E5E0D8;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, .4);
+      min-width: 180px;
+      overflow: hidden;
+      display: none;
+      z-index: 999
+    }
+
+    .lang-dropdown.open {
+      display: block;
+      animation: riseUp .2s ease both
+    }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      font-size: .88rem;
+      font-weight: 600;
+      color: #4B5563;
+      transition: .15s;
+      cursor: pointer
+    }
+
+    .lang-option:hover,
+    .lang-option.active {
+      background: rgba(232,169,69,0.12);
+      color: var(--gold)
+    }
+
+    .btn-z {
+      background: linear-gradient(135deg, var(--or), var(--or2));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 11px 26px;
+      font-weight: 700;
+      font-size: .92rem;
+      transition: .22s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      box-shadow: 0 6px 20px rgba(255,82,0,0.35)
+    }
+
+    .btn-z:hover {
+      background: linear-gradient(135deg, #E04800, var(--or));
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(255, 82, 0, .45);
+      color: #1A1A1A
+    }
+
+    .btn-z-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 2px solid rgba(232,169,69,0.5);
+      border-radius: 14px;
+      padding: 9px 22px;
+      font-weight: 700;
+      font-size: .9rem;
+      transition: .2s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit
+    }
+
+    .btn-z-outline:hover {
+      background: var(--or);
+      color: #fff;
+      transform: translateY(-1px)
+    }
+
+    .btn-primary {
+      background: var(--or) !important;
+      border-color: var(--or) !important
+    }
+
+    .btn-primary:hover {
+      background: #E04800 !important;
+      border-color: #E04800 !important
+    }
+
+    .btn-outline-primary {
+      color: var(--or) !important;
+      border-color: var(--or) !important
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--or) !important;
+      color: #fff !important
+    }
+
+    .form-control,
+    .form-select {
+      background: #F3F0EB !important;
+      border: 1.5px solid #E5E0D8 !important;
+      color: #1A1A1A !important;
+      border-radius: 12px !important
+    }
+
+    .form-control::placeholder { color: rgba(255,255,255,0.3) !important }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: rgba(232,169,69,0.5) !important;
+      box-shadow: 0 0 0 3px rgba(232,169,69,0.1) !important;
+      background: rgba(255,255,255,0.09) !important
+    }
+
+    .form-select option { background: #FFFFFF; color: #fff }
+
+    .z-card {
+      background: var(--dark-card);
+      border-radius: var(--r);
+      box-shadow: var(--sh);
+      border: 1px solid #E5E0D8;
+      overflow: hidden
+    }
+
+    .alert {
+      border: none;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 1rem
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      color: #14532d;
+      border: 1px solid #bbf7d0
+    }
+
+    .alert-danger {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 1px solid #fecaca
+    }
+
+    .alert-warning {
+      background: #fef9c3;
+      color: #713f12;
+      border: 1px solid #fde68a
+    }
+
+    .alert-info {
+      background: #dbeafe;
+      color: #1e3a5f;
+      border: 1px solid #bfdbfe
+    }
+
+    @keyframes riseUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .rise {
+      animation: riseUp .5s cubic-bezier(.22, 1, .36, 1) both
+    }
+
+    .rise-1 {
+      animation: riseUp .5s .1s cubic-bezier(.22, 1, .36, 1) both
+    }
+
+    .rise-2 {
+      animation: riseUp .5s .2s cubic-bezier(.22, 1, .36, 1) both
+    }
+
+    .rise-3 {
+      animation: riseUp .5s .3s cubic-bezier(.22, 1, .36, 1) both
+    }
+
+    .rise-4 {
+      animation: riseUp .5s .4s cubic-bezier(.22, 1, .36, 1) both
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #F5F2EE;
+      border-top: 1px solid #E5E0D8;
+      padding: 8px 0;
+      z-index: 999;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, .4)
+    }
+
+    .mobile-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: #9CA3AF;
+      font-size: .65rem;
+      font-weight: 600;
+      flex: 1;
+      padding: 4px;
+      text-decoration: none;
+      transition: .15s
+    }
+
+    .mobile-nav a:hover {
+      color: var(--gold)
+    }
+
+    .mobile-nav i {
+      font-size: 1.1rem
+    }
+
+    @media(max-width:768px) {
+      .mobile-nav {
+        display: flex
+      }
+
+      body {
+        padding-bottom: 70px
+      }
+    }
+
+    .site-footer {
+      background: var(--dark);
+      color: rgba(255, 255, 255, .5);
+      padding: 28px 0;
+      margin-top: 64px
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-track { background: #F5F2EE }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(232,169,69,0.5);
+      border-radius: 8px
+    }
+
+    /* Bootstrap dark overrides */
+    .table { color: var(--txt) !important }
+    .table td, .table th { border-color: #E5E0D8 !important; color: var(--txt) }
+    .table thead th { background: #F3F0EB !important; color: #4B5563 !important; border-bottom: 1px solid rgba(255,255,255,0.1) !important }
+    .table tbody tr:hover { background: rgba(255,255,255,0.04) !important }
+    .table-striped > tbody > tr:nth-of-type(odd) { background: rgba(255,255,255,0.03) !important }
+    .modal-content { background: #FFFFFF !important; border: 1px solid #E5E0D8 !important; color: var(--txt) }
+    .modal-header { border-bottom: 1px solid rgba(255,255,255,0.10) !important }
+    .modal-footer { border-top: 1px solid rgba(255,255,255,0.10) !important }
+    .modal-title { color: #fff !important }
+    .dropdown-menu { background: #FFFFFF !important; border: 1.5px solid #E5E0D8 !important; box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important }
+    .dropdown-item { color: #6B7280 !important }
+    .dropdown-item:hover { background: rgba(232,169,69,0.12) !important; color: var(--gold) !important }
+    .dropdown-divider { border-color: rgba(255,255,255,0.1) !important }
+    .badge.bg-light { background: #F3F0EB !important; color: rgba(255,255,255,0.8) !important }
+    .badge.bg-secondary { background: rgba(255,255,255,0.15) !important }
+    .card { background: #FFFFFF !important; border: 1px solid #E5E0D8 !important; color: var(--txt) }
+    .card-header { background: #F8F5F1 !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; color: #fff }
+    .card-footer { background: #FAFAF8 !important; border-top: 1px solid rgba(255,255,255,0.08) !important }
+    .list-group-item { background: #FFFFFF !important; border-color: #E5E0D8 !important; color: var(--txt) }
+    .list-group-item:hover { background: rgba(255,255,255,0.04) !important }
+    .nav-tabs { border-bottom: 1px solid rgba(255,255,255,0.1) !important }
+    .nav-tabs .nav-link { color: rgba(255,255,255,0.5) !important }
+    .nav-tabs .nav-link:hover { color: var(--gold) !important; border-color: transparent !important }
+    .nav-tabs .nav-link.active { background: #F3F0EB !important; border-color: #E5E0D8,0.1) rgba(255,255,255,0.1) transparent !important; color: #fff !important }
+    .form-control, .form-select { background: #F3F0EB !important; border: 1.5px solid #E5E0D8 !important; color: #1A1A1A !important; border-radius: 10px }
+    .form-control::placeholder { color: rgba(255,255,255,0.3) !important }
+    .form-select option { background: #fff; color: #1A1A1A }
+    .input-group-text { background: #F3F0EB !important; border: 1.5px solid #E5E0D8 !important; color: rgba(255,255,255,0.5) !important }
+    .btn-outline-secondary { color: rgba(255,255,255,0.6) !important; border-color: rgba(255,255,255,0.2) !important }
+    .btn-outline-secondary:hover { background: #F3F0EB !important; color: #fff !important }
+    .btn-light { background: #F3F0EB !important; border-color: #E5E0D8 !important; color: rgba(255,255,255,0.8) !important }
+    .btn-light:hover { background: rgba(255,255,255,0.18) !important }
+    .text-muted { color: rgba(255,255,255,0.45) !important }
+    .text-dark { color: #E8EDE8 !important }
+    .text-secondary { color: rgba(255,255,255,0.5) !important }
+    .bg-light { background: rgba(255,255,255,0.06) !important }
+    .bg-white { background: #1A3530 !important }
+    .border { border-color: rgba(255,255,255,0.1) !important }
+    .border-bottom { border-bottom-color: rgba(255,255,255,0.1) !important }
+    .border-top { border-top-color: rgba(255,255,255,0.1) !important }
+    hr { border-color: #E5E0D8 !important }
+    h1,h2,h3,h4,h5,h6 { color: #1A1A1A }
+    p { color: var(--txt) }
+    small { color: #9CA3AF !important }
+    .btn-close { filter: none }
+    .pagination .page-link { background: #F3F0EB !important; border-color: #E5E0D8 !important; color: #6B7280 !important }
+    .pagination .page-item.active .page-link { background: var(--or) !important; border-color: var(--or) !important; color: #fff !important }
+    .progress { background: #E5E0D8 !important }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+  {% if session.user_id %}
+  <nav class="navbar" id="mainNav">
+    <div class="container d-flex align-items-center justify-content-between gap-2">
+      <a href="{{ url_for('restaurants') }}" class="zaaq-logo">
+        <div class="logo-mark">🍽️</div>
+        <span class="logo-text">Zaa<em>Qa</em></span>
+      </a>
+      <div class="d-none d-md-flex align-items-center gap-1">
+        <a href="{{ url_for('restaurants') }}" class="nav-pill"><i class="fas fa-store"></i>Restaurants</a>
+        <a href="{{ url_for('advanced_search') }}" class="nav-pill"><i class="fas fa-search"></i>Search</a>
+        <a href="{{ url_for('offers') }}" class="nav-pill"><i class="fas fa-tag"></i>Offers</a>
+        <a href="{{ url_for('my_orders') }}" class="nav-pill"><i class="fas fa-receipt"></i>Orders</a>
+        <a href="{{ url_for('health_check') }}" class="nav-pill"><i class="fas fa-heartbeat"></i>Health</a>
+        <a href="{{ url_for('dashboard') }}" class="nav-pill" style="color:#7C3AED"><i
+            class="fas fa-chart-line"></i>Analytics</a>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <a href="{{ url_for('notifications') }}" class="notif-btn" id="notifBtn">
+          <i class="fas fa-bell" style="font-size:.95rem"></i>
+          <span class="notif-dot" id="notifDot" style="display:none"></span>
+        </a>
+        <div class="lang-switcher d-none d-md-block">
+          <button class="lang-btn" onclick="toggleLang(event)">
+            {{ lang_info.flag }} {{ lang_info.name }}
+            <i class="fas fa-chevron-down" style="font-size:.7rem"></i>
+          </button>
+          <div class="lang-dropdown" id="langDropdown">
+            {% for code, info in all_langs.items() %}
+            <a href="{{ url_for('set_language', lang=code) }}"
+              class="lang-option {% if current_lang==code %}active{% endif %}">
+              <span>{{ info.flag }}</span>{{ info.name }}
+              {% if current_lang==code %}<i class="fas fa-check ms-auto" style="color:var(--or);font-size:.75rem"></i>{%
+              endif %}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        <a href="{{ url_for('user_profile') }}" class="notif-btn d-none d-md-flex">
+          <i class="fas fa-user" style="font-size:.9rem"></i>
+        </a>
+        <a href="{{ url_for('cart') }}" class="cart-pill">
+          <i class="fas fa-bag-shopping"></i>
+          <span class="d-none d-md-inline">Cart</span>
+          {% if session.cart %}<span class="cart-bubble">{{ session.cart|length }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('logout') }}" class="nav-pill d-none d-md-flex" style="color:var(--muted)">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-nav">
+    <a href="{{ url_for('restaurants') }}"><i class="fas fa-store"></i>Home</a>
+    <a href="{{ url_for('advanced_search') }}"><i class="fas fa-search"></i>Search</a>
+    <a href="{{ url_for('offers') }}"><i class="fas fa-tag"></i>Offers</a>
+    <a href="{{ url_for('my_orders') }}"><i class="fas fa-receipt"></i>Orders</a>
+    <a href="{{ url_for('dashboard') }}"><i class="fas fa-chart-line"></i>Analytics</a>
+  </div>
+
+  {% elif session.admin_id %}
+  <nav class="navbar" id="mainNav">
+    <div class="container-fluid d-flex align-items-center justify-content-between px-4">
+      <a href="{{ url_for('admin_dashboard') }}" class="zaaq-logo">
+        <div class="logo-mark" style="background:linear-gradient(145deg,#7C3AED,#A855F7)">⚡</div>
+        <span class="logo-text">Zaa<em>Qa</em>
+          <small style="font-size:.62rem;color:var(--muted);font-family:inherit;font-weight:500">Admin</small>
+        </span>
+      </a>
+      <div class="d-flex align-items-center gap-1">
+        <a href="{{ url_for('admin_restaurants') }}" class="nav-pill"><i class="fas fa-store"></i>Restaurants</a>
+        <a href="{{ url_for('admin_menu') }}" class="nav-pill"><i class="fas fa-utensils"></i>Menu</a>
+        <a href="{{ url_for('admin_orders') }}" class="nav-pill"><i class="fas fa-receipt"></i>Orders</a>
+        <a href="{{ url_for('admin_users') }}" class="nav-pill"><i class="fas fa-users"></i>Users</a>
+        <a href="{{ url_for('admin_analytics') }}" class="nav-pill" style="color:#7C3AED">
+          <i class="fas fa-chart-bar"></i>Analytics
+        </a>
+        <a href="{{ url_for('admin_logout') }}" class="nav-pill" style="color:var(--muted)">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} alert-dismissible fade show rise">
+      {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endwith %}
+  </div>
+
+  <main class="container py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="zaaq-logo">
+        <div class="logo-mark" style="width:32px;height:32px;font-size:.9rem">🍽️</div>
+        <span class="logo-text" style="color:#fff;font-size:1.2rem">Zaa<em>Qa</em></span>
+      </div>
+      <p style="font-size:.83rem;margin:0">{{ t('amritsar_tagline') }} &copy; 2025</p>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    window.addEventListener('scroll', () => {
+      document.getElementById('mainNav')?.classList.toggle('scrolled', scrollY > 10);
+    });
+    function toggleLang(e) {
+      e.stopPropagation();
+      document.getElementById('langDropdown').classList.toggle('open');
+    }
+    document.addEventListener('click', () => {
+      document.getElementById('langDropdown')?.classList.remove('open');
+    });
+  </script>
+  {% if session.user_id %}
+  <script>
+    function checkNotifs() {
+      fetch('/api/notifications/count')
+        .then(r => r.json())
+        .then(d => {
+          const dot = document.getElementById('notifDot');
+          if (dot) dot.style.display = d.count > 0 ? 'block' : 'none';
+        }).catch(() => { });
+    }
+    checkNotifs();
+    setInterval(checkNotifs, 30000);
+  </script>
+  {% endif %}
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

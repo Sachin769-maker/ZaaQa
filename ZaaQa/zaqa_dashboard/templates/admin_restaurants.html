@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Restaurants — Admin{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-4"><i class="fas fa-store me-2" style="color:var(--primary)"></i>All Restaurants ({{ restaurants|length }})</h3>
+<div class="card">
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>#</th><th>Name</th><th>Area</th><th>Cuisine</th><th>Rating</th><th>Delivery</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for r in restaurants %}
+        <tr>
+          <td>{{ r.id }}</td>
+          <td><strong>{{ r.name }}</strong><br><small class="text-muted">{{ r.address[:40] }}…</small></td>
+          <td>{{ r.area }}</td>
+          <td><small>{{ r.cuisine }}</small></td>
+          <td><span class="badge bg-success">⭐ {{ r.rating }}</span></td>
+          <td><small>{{ r.delivery_time }}</small></td>
+          <td>
+            {% if r.is_open %}
+              <span class="badge bg-success">Open</span>
+            {% else %}
+              <span class="badge bg-danger">Closed</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('admin_toggle_restaurant', rid=r.id) }}"
+               class="btn btn-sm {% if r.is_open %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+              {% if r.is_open %}Close{% else %}Open{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,982 @@
+{% extends 'base.html' %}
+{% block title %}Live Analytics Dashboard — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════
+   DASHBOARD — Professional Dark Theme
+   ═══════════════════════════════════════════════════ */
+
+/* ── BASE OVERRIDES ── */
+body { background: #0B1120 !important; }
+.container.py-4 { padding-top: 28px !important; padding-bottom: 40px !important; }
+
+/* ── GRID LAYOUT ── */
+.db-wrap { display: flex; flex-direction: column; gap: 24px; }
+
+/* ── HEADER ── */
+.db-header {
+  background: linear-gradient(135deg, #FF5200 0%, #FF7A3D 60%, #FF9A5C 100%);
+  border-radius: 20px;
+  padding: 28px 36px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  box-shadow: 0 8px 32px rgba(255,82,0,.35);
+  position: relative; overflow: hidden;
+}
+.db-header::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  pointer-events: none;
+}
+.db-header::after {
+  content: '';
+  position: absolute; bottom: -60px; right: 80px;
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.04);
+  pointer-events: none;
+}
+.db-header h1 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.9rem; font-weight: 700;
+  color: #fff; margin: 0; letter-spacing: -.3px;
+}
+.db-header p { color: rgba(255,255,255,.85); margin: 6px 0 0; font-size: .9rem; font-weight: 500; }
+.db-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.badge-live {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.2); backdrop-filter: blur(8px);
+  border-radius: 50px; padding: 8px 20px;
+  font-weight: 700; font-size: .88rem; color: #fff;
+  border: 1px solid rgba(255,255,255,.25);
+}
+.live-pulse {
+  width: 9px; height: 9px;
+  background: #4ade80; border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(74,222,128,.5);
+  animation: liveping 1.4s infinite;
+}
+@keyframes liveping {
+  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
+}
+.badge-timer {
+  background: rgba(255,255,255,.15); backdrop-filter: blur(8px);
+  border-radius: 50px; padding: 8px 20px;
+  font-size: .85rem; font-weight: 600; color: rgba(255,255,255,.9);
+  border: 1px solid rgba(255,255,255,.2);
+}
+
+/* ── KPI GRID ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 640px)  { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+
+.kpi-card {
+  background: #141E2E;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  padding: 20px 22px 18px;
+  position: relative; overflow: hidden;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,82,0,.3);
+  box-shadow: 0 12px 32px rgba(0,0,0,.35);
+}
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #FF5200, #FF9A5C);
+  opacity: 0; transition: opacity .2s;
+}
+.kpi-card:hover::before { opacity: 1; }
+.kpi-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin-bottom: 14px;
+}
+.kpi-val {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1.65rem; font-weight: 700;
+  color: #fff; line-height: 1; margin-bottom: 6px;
+  transition: color .3s;
+}
+.kpi-val.flash { color: #FF7A3D; }
+.kpi-lbl {
+  font-size: .77rem; font-weight: 600;
+  color: rgba(255,255,255,.42); letter-spacing: .3px; text-transform: uppercase;
+}
+
+/* ── CARD SHELL ── */
+.db-card {
+  background: #141E2E;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.07);
+  padding: 26px 28px;
+}
+.db-card-title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  color: #fff; margin: 0 0 20px;
+  display: flex; align-items: center; gap: 9px;
+  letter-spacing: -.1px;
+}
+.db-card-title small {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: .72rem; font-weight: 500;
+  color: rgba(255,255,255,.4); margin-left: 4px;
+}
+
+/* ── ROW GRIDS ── */
+.row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.row-half { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.row-3side { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.side-stack { display: flex; flex-direction: column; gap: 20px; }
+@media (max-width: 900px) {
+  .row-2, .row-half, .row-3side { grid-template-columns: 1fr; }
+}
+
+/* ── LINE CHART ── */
+.line-wrap { position: relative; width: 100%; height: 230px; }
+
+/* ── LIVE FEED ── */
+.feed-scroll {
+  max-height: 310px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: rgba(255,82,0,.3) transparent;
+}
+.feed-scroll::-webkit-scrollbar { width: 4px; }
+.feed-scroll::-webkit-scrollbar-track { background: transparent; }
+.feed-scroll::-webkit-scrollbar-thumb { background: rgba(255,82,0,.35); border-radius: 4px; }
+
+.feed-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: 12px;
+  margin-bottom: 8px; border: 1px solid transparent;
+  animation: fadeInLeft .35s ease;
+}
+@keyframes fadeInLeft {
+  from { opacity:0; transform:translateX(-10px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.feed-item.is-new {
+  background: rgba(255,82,0,.07);
+  border-color: rgba(255,82,0,.2);
+}
+.feed-item.is-old {
+  background: rgba(255,255,255,.025);
+  border-color: rgba(255,255,255,.06);
+}
+.feed-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  margin-top: 4px; flex-shrink: 0;
+}
+.feed-dot.active { background: #FF5200; animation: liveping 1.5s infinite; }
+.feed-dot.idle   { background: rgba(255,255,255,.2); }
+.feed-name { font-weight: 700; font-size: .88rem; color: #fff; margin-bottom: 3px; }
+.feed-sub  { font-size: .73rem; color: rgba(255,255,255,.42); }
+.feed-right { margin-left: auto; text-align: right; flex-shrink: 0; }
+.feed-amt  { font-family: 'Clash Display', sans-serif; font-weight: 700; color: #FF7A3D; font-size: .9rem; margin-bottom: 4px; }
+.feed-pill {
+  font-size: .66rem; font-weight: 700;
+  padding: 2px 9px; border-radius: 20px;
+  display: inline-block;
+}
+
+/* ── TOP RESTAURANTS BAR ── */
+.rest-bar-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.rest-bar-row:last-child { border-bottom: none; }
+.rest-bar-rank {
+  font-family: 'Clash Display', sans-serif;
+  font-size: .75rem; font-weight: 700;
+  color: rgba(255,255,255,.3);
+  width: 18px; text-align: center; flex-shrink: 0;
+}
+.rest-bar-name {
+  font-size: .85rem; font-weight: 600; color: #fff;
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rest-bar-track {
+  width: 180px; flex-shrink: 0;
+  height: 7px; background: rgba(255,255,255,.08); border-radius: 10px;
+  overflow: hidden;
+}
+.rest-bar-fill {
+  height: 100%; border-radius: 10px;
+  background: linear-gradient(90deg, #FF5200, #FF9A5C);
+  transition: width 1.2s cubic-bezier(.22,1,.36,1);
+}
+.rest-bar-num {
+  font-family: 'Clash Display', sans-serif;
+  font-size: .82rem; font-weight: 700; color: #FF7A3D;
+  width: 46px; text-align: right; flex-shrink: 0;
+}
+
+/* ── DONUT LEGEND ── */
+.donut-outer { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.donut-canvas-wrap { position: relative; width: 200px; height: 200px; }
+.donut-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%); text-align: center;
+}
+.donut-num  { font-family: 'Clash Display', sans-serif; font-size: 1.5rem; font-weight: 700; color: #fff; line-height: 1; }
+.donut-sub  { font-size: .68rem; color: rgba(255,255,255,.45); margin-top: 4px; font-weight: 500; letter-spacing: .3px; text-transform: uppercase; }
+.donut-legend { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.dl-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.05);
+  transition: background .2s;
+}
+.dl-row:hover { background: rgba(255,255,255,.06); }
+.dl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dl-name { font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.8); flex: 1; }
+.dl-val  { font-family: 'Clash Display', sans-serif; font-size: .85rem; font-weight: 700; }
+.dl-pct  { font-size: .72rem; color: rgba(255,255,255,.35); margin-left: 6px; }
+
+/* ── AREA PILLS ── */
+.area-pill-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.area-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,82,0,.1); border: 1px solid rgba(255,82,0,.2);
+  border-radius: 50px; padding: 6px 14px 6px 10px;
+  font-size: .8rem; font-weight: 600; color: #FF9A5C;
+  transition: background .2s;
+  cursor: default;
+}
+.area-pill:hover { background: rgba(255,82,0,.18); }
+.area-count {
+  background: #FF5200; color: #fff;
+  border-radius: 50%; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .68rem; font-weight: 800;
+}
+.area-chart-wrap { position: relative; width: 100%; height: 280px; }
+
+/* ── PAYMENT DONUT ── */
+.pay-wrap { position: relative; width: 100%; height: 160px; }
+
+/* ── HOUR CHART ── */
+.hour-wrap { position: relative; width: 100%; height: 160px; }
+
+/* ── TREND GRID ── */
+.trend-grid-pro {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+.trend-card-pro {
+  background: #0F1929;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  overflow: hidden;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+}
+.trend-card-pro:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,82,0,.35);
+  box-shadow: 0 12px 28px rgba(0,0,0,.4);
+}
+.trend-thumb {
+  width: 100%; height: 90px; object-fit: cover; display: block;
+}
+.trend-body { padding: 12px 14px 14px; }
+.trend-title { font-size: .88rem; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.35; }
+.trend-meta  { display: flex; flex-direction: column; gap: 4px; }
+.trend-kcal  { font-size: .78rem; font-weight: 700; color: #FF7A3D; }
+.trend-info  { font-size: .73rem; color: rgba(255,255,255,.45); }
+.trend-skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }
+
+/* ── API STATUS BADGE ── */
+.api-badge {
+  font-size: .72rem; font-weight: 700;
+  padding: 3px 12px; border-radius: 20px;
+  margin-left: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="db-wrap">
+
+  <!-- ── HEADER ── -->
+  <div class="db-header rise">
+    <div>
+      <h1>📊 Live Analytics Dashboard</h1>
+      <p>ZaaQa — Amritsar Food Delivery &nbsp;·&nbsp; Real-time data</p>
+    </div>
+    <div class="db-badges">
+      <div class="badge-live"><span class="live-pulse"></span>LIVE</div>
+      <div class="badge-timer">⟳ Updates every 30s</div>
+    </div>
+  </div>
+
+  <!-- ── KPI CARDS ── -->
+  <div class="kpi-grid rise-1">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#1E3A5F">📦</div>
+      <div class="kpi-val" id="total-orders">—</div>
+      <div class="kpi-lbl">Total Orders</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#1B3A2B">🛵</div>
+      <div class="kpi-val" id="today-orders">—</div>
+      <div class="kpi-lbl">Today Orders</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#3A1F0D">💰</div>
+      <div class="kpi-val" id="revenue">—</div>
+      <div class="kpi-lbl">Total Revenue</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#3A2A0A">📈</div>
+      <div class="kpi-val" id="today-revenue">—</div>
+      <div class="kpi-lbl">Today Revenue</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#2A1A4A">👥</div>
+      <div class="kpi-val" id="total-users">—</div>
+      <div class="kpi-lbl">Total Users</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#3A1A1A">🧾</div>
+      <div class="kpi-val" id="avg-order">—</div>
+      <div class="kpi-lbl">Avg Order Value</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1: Revenue Chart + Live Feed ── -->
+  <div class="row-2 rise-2">
+
+    <!-- Revenue Chart -->
+    <div class="db-card">
+      <div class="db-card-title">📈 Revenue — Last 7 Days</div>
+      <div class="line-wrap">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div class="db-card">
+      <div class="db-card-title">
+        🔴 Live Orders
+        <span id="feedCount" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;color:rgba(255,255,255,.38);margin-left:auto"></span>
+      </div>
+      <div class="feed-scroll" id="liveFeed">
+        <div style="padding:50px 0;text-align:center;color:rgba(255,255,255,.3)">
+          <div style="font-size:2rem;margin-bottom:10px">⏳</div>
+          <div style="font-size:.85rem">Loading live feed…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 2: Top Restaurants + Order Status ── -->
+  <div class="row-half rise-3">
+
+    <!-- Top Restaurants -->
+    <div class="db-card">
+      <div class="db-card-title">🏆 Top Restaurants by Orders</div>
+      <div id="topRestsChart"></div>
+    </div>
+
+    <!-- Order Status Donut -->
+    <div class="db-card">
+      <div class="db-card-title">📋 Order Status Breakdown</div>
+      <div class="donut-outer">
+        <div class="donut-canvas-wrap">
+          <canvas id="statusChart" width="200" height="200"></canvas>
+          <div class="donut-center">
+            <div class="donut-num" id="donut-total">—</div>
+            <div class="donut-sub">Orders</div>
+          </div>
+        </div>
+        <div class="donut-legend" id="statusLegend"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 3: Area Distribution + Payment + Hourly ── -->
+  <div class="row-3side rise-3">
+
+    <!-- Area Distribution -->
+    <div class="db-card" style="display:flex;flex-direction:column;">
+      <div class="db-card-title">🗺️ Orders by Area — Amritsar</div>
+      <div class="area-pill-grid" id="areaGrid">
+        <div style="color:rgba(255,255,255,.35);font-size:.85rem">Loading…</div>
+      </div>
+      <div class="area-chart-wrap" style="flex:1;">
+        <canvas id="areaChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Right Stack: Payment + Hourly -->
+    <div class="side-stack">
+      <div class="db-card">
+        <div class="db-card-title">💳 Payment Methods</div>
+        <div class="pay-wrap">
+          <canvas id="payChart"></canvas>
+        </div>
+      </div>
+      <div class="db-card">
+        <div class="db-card-title">⏰ Orders by Hour <small>(Today)</small></div>
+        <div class="hour-wrap">
+          <canvas id="hourChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── ROW 4: Trending Foods ── -->
+  <div class="db-card rise-4">
+    <div class="db-card-title">
+      🌐 Trending Indian Foods
+      <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.72rem;font-weight:500;color:rgba(255,255,255,.38)">via Spoonacular API</span>
+      <span id="apiStatus" class="api-badge"></span>
+    </div>
+    <div class="trend-grid-pro" id="trendGrid">
+      {% for i in range(12) %}
+      <div class="trend-card-pro">
+        <div class="trend-skeleton" style="height:90px"></div>
+        <div class="trend-body">
+          <div class="trend-skeleton" style="height:13px;width:80%;border-radius:4px;margin-bottom:10px"></div>
+          <div class="trend-skeleton" style="height:10px;width:55%;border-radius:4px;margin-bottom:6px"></div>
+          <div class="trend-skeleton" style="height:10px;width:70%;border-radius:4px"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// ═══ GLOBALS ═══════════════════════════════════════════════════════════════
+const C_OR   = '#FF5200';
+const C_OR2  = '#FF9A5C';
+const PALETTE = ['#FF5200','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EC4899','#06B6D4','#84CC16'];
+const DARK_GRID = 'rgba(255,255,255,.05)';
+const TICK_CLR  = 'rgba(255,255,255,.45)';
+
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color       = TICK_CLR;
+
+let revenueChart, statusChart, areaChart, payChart, hourChart;
+let lastOrderTime = null;
+
+// ═══ CHART INIT ════════════════════════════════════════════════════════════
+function mkRevenueChart() {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+
+  // gradient fills
+  const gradOr = ctx.createLinearGradient(0,0,0,230);
+  gradOr.addColorStop(0,'rgba(255,82,0,.18)');
+  gradOr.addColorStop(1,'rgba(255,82,0,0)');
+
+  const gradBl = ctx.createLinearGradient(0,0,0,230);
+  gradBl.addColorStop(0,'rgba(59,130,246,.12)');
+  gradBl.addColorStop(1,'rgba(59,130,246,0)');
+
+  revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'Revenue (₹)',
+          data: [], yAxisID: 'yRev',
+          borderColor: C_OR, backgroundColor: gradOr,
+          borderWidth: 2.5, fill: true, tension: .45,
+          pointBackgroundColor: C_OR, pointBorderColor: '#0B1120',
+          pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7,
+        },
+        {
+          label: 'Orders',
+          data: [], yAxisID: 'yOrd',
+          borderColor: '#3B82F6', backgroundColor: gradBl,
+          borderWidth: 2, fill: true, tension: .45,
+          pointBackgroundColor: '#3B82F6', pointBorderColor: '#0B1120',
+          pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 10, padding: 18, color: TICK_CLR, font: { size: 12 } }
+        },
+        tooltip: {
+          backgroundColor: '#1B2A3E',
+          borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: TICK_CLR,
+          padding: 12, cornerRadius: 10,
+        }
+      },
+      scales: {
+        yRev: {
+          beginAtZero: true, position: 'left',
+          grid: { color: DARK_GRID },
+          ticks: { color: TICK_CLR, callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0)+'K' : v) }
+        },
+        yOrd: {
+          beginAtZero: true, position: 'right',
+          grid: { display: false },
+          ticks: { color: TICK_CLR, callback: v => v + ' ord' }
+        },
+        x: {
+          grid: { color: DARK_GRID },
+          ticks: { color: TICK_CLR }
+        }
+      }
+    }
+  });
+}
+
+function mkStatusChart() {
+  const ctx = document.getElementById('statusChart').getContext('2d');
+  statusChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: PALETTE,
+        borderWidth: 3, borderColor: '#141E2E',
+        hoverBorderColor: '#141E2E',
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: false, cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1B2A3E',
+          borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: TICK_CLR,
+          padding: 10, cornerRadius: 8,
+          callbacks: {
+            label: c => `  ${c.label}: ${c.raw.toLocaleString()} orders`
+          }
+        }
+      }
+    }
+  });
+}
+
+function mkAreaChart() {
+  const ctx = document.getElementById('areaChart').getContext('2d');
+  areaChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Orders',
+        data: [],
+        backgroundColor: PALETTE,
+        borderRadius: 10,
+        borderSkipped: false,
+        borderWidth: 0,
+        hoverBorderWidth: 0,
+        categoryPercentage: 0.65,
+        barPercentage: 0.80,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 10, bottom: 0, left: 4, right: 4 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1B2A3E',
+          borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: TICK_CLR,
+          padding: 10, cornerRadius: 8,
+          callbacks: {
+            label: c => `  Orders: ${c.raw.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: DARK_GRID },
+          border: { display: false },
+          ticks: { color: TICK_CLR, font: { size: 11 }, maxTicksLimit: 6 }
+        },
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: TICK_CLR, font: { size: 11 }, padding: 8 }
+        }
+      }
+    }
+  });
+}
+
+function mkPayChart() {
+  const ctx = document.getElementById('payChart').getContext('2d');
+  payChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [C_OR, '#3B82F6', '#10B981'],
+        borderWidth: 3, borderColor: '#141E2E',
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            boxWidth: 10, padding: 14,
+            color: TICK_CLR, font: { size: 11 }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1B2A3E',
+          borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: TICK_CLR,
+          padding: 10, cornerRadius: 8,
+          callbacks: {
+            label: c => `  ${c.label}: ${c.raw.toLocaleString()}`
+          }
+        }
+      }
+    }
+  });
+}
+
+function mkHourChart() {
+  const ctx = document.getElementById('hourChart').getContext('2d');
+  const hours = Array.from({length:24}, (_,i) => i + ':00');
+
+  const grad = ctx.createLinearGradient(0,0,0,160);
+  grad.addColorStop(0, 'rgba(255,82,0,.8)');
+  grad.addColorStop(1, 'rgba(255,82,0,.2)');
+
+  hourChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: hours,
+      datasets: [{
+        label: 'Orders',
+        data: Array(24).fill(0),
+        backgroundColor: grad,
+        borderRadius: 5, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1B2A3E',
+          borderColor: 'rgba(255,255,255,.1)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: TICK_CLR,
+          padding: 8, cornerRadius: 8,
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: DARK_GRID },
+          ticks: { color: TICK_CLR, font: { size: 10 }, stepSize: 1 }
+        },
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: TICK_CLR, font: { size: 9 }, maxRotation: 0,
+            callback: (_, i) => i % 6 === 0 ? i + ':00' : ''
+          }
+        }
+      }
+    }
+  });
+}
+
+// ═══ UPDATE FUNCTIONS ══════════════════════════════════════════════════════
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.innerText !== val && el.innerText !== '—') {
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 600);
+  }
+  el.innerText = val;
+}
+
+function updateStats(d) {
+  setVal('total-orders',  d.total_orders.toLocaleString());
+  setVal('today-orders',  d.today_orders.toLocaleString());
+  setVal('revenue',       '₹' + Math.round(d.revenue).toLocaleString());
+  setVal('today-revenue', '₹' + Math.round(d.today_revenue).toLocaleString());
+  setVal('total-users',   d.total_users.toLocaleString());
+  setVal('avg-order',     '₹' + Math.round(d.avg_order));
+}
+
+function updateRevenue(rev7) {
+  if (!rev7.length) return;
+  revenueChart.data.labels              = rev7.map(r => r.date.slice(5));
+  revenueChart.data.datasets[0].data   = rev7.map(r => Math.round(r.revenue));
+  revenueChart.data.datasets[1].data   = rev7.map(r => r.orders);
+  revenueChart.update();
+}
+
+function updateStatus(statusData) {
+  const entries = Object.entries(statusData);
+  const total   = entries.reduce((s, [, v]) => s + v, 0);
+  document.getElementById('donut-total').innerText = total.toLocaleString();
+
+  statusChart.data.labels                     = entries.map(([k]) => k);
+  statusChart.data.datasets[0].data          = entries.map(([, v]) => v);
+  statusChart.update();
+
+  document.getElementById('statusLegend').innerHTML = entries.map(([k, v], i) => {
+    const pct = total > 0 ? ((v / total) * 100).toFixed(1) : 0;
+    return `<div class="dl-row">
+      <span class="dl-dot" style="background:${PALETTE[i]}"></span>
+      <span class="dl-name">${k}</span>
+      <strong class="dl-val" style="color:${PALETTE[i]}">${v.toLocaleString()}</strong>
+      <span class="dl-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function updateTopRests(topRests) {
+  if (!topRests.length) return;
+  const max  = topRests[0].orders;
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('topRestsChart').innerHTML = topRests.map((r, i) => `
+    <div class="rest-bar-row">
+      <div class="rest-bar-rank">${medals[i] || (i+1)}</div>
+      <div class="rest-bar-name" title="${r.name}">${r.name}</div>
+      <div class="rest-bar-track">
+        <div class="rest-bar-fill" style="width:${Math.round((r.orders/max)*100)}%"></div>
+      </div>
+      <div class="rest-bar-num">${r.orders.toLocaleString()}</div>
+    </div>`).join('');
+}
+
+function updateArea(areaData) {
+  if (!areaData.length) return;
+  document.getElementById('areaGrid').innerHTML = areaData.map(a => `
+    <div class="area-pill">
+      <i class="fas fa-location-dot" style="font-size:.7rem"></i>
+      ${a.area}
+      <span class="area-count">${a.orders}</span>
+    </div>`).join('');
+
+  areaChart.data.labels                    = areaData.map(a => a.area.split(' ')[0]);
+  areaChart.data.datasets[0].data         = areaData.map(a => a.orders);
+  areaChart.update();
+}
+
+function updatePay(payData) {
+  payChart.data.labels               = payData.map(p => p.method || 'Unknown');
+  payChart.data.datasets[0].data    = payData.map(p => p.count);
+  payChart.update();
+}
+
+function updateHour(hourData) {
+  const arr = Array(24).fill(0);
+  hourData.forEach(h => { if (h.hour >= 0 && h.hour < 24) arr[h.hour] = h.count; });
+  hourChart.data.datasets[0].data = arr;
+  hourChart.update();
+}
+
+function statusPill(s) {
+  const map = {
+    'Delivered':        'background:rgba(74,222,128,.15);color:#86EFAC',
+    'Cancelled':        'background:rgba(248,113,113,.15);color:#FCA5A5',
+    'Pending':          'background:rgba(59,130,246,.15);color:#93C5FD',
+    'Confirmed':        'background:rgba(16,185,129,.15);color:#6EE7B7',
+    'Preparing':        'background:rgba(245,158,11,.15);color:#FCD34D',
+    'Out for Delivery': 'background:rgba(99,102,241,.15);color:#C4B5FD',
+  };
+  return map[s] || 'background:rgba(255,255,255,.1);color:#fff';
+}
+
+function updateFeed(feed) {
+  if (!feed.length) return;
+  const latest = feed[0];
+  const isNew  = !lastOrderTime || latest.time !== lastOrderTime;
+  if (isNew) lastOrderTime = latest.time;
+
+  document.getElementById('feedCount').innerText = feed.length + ' recent';
+  document.getElementById('liveFeed').innerHTML = feed.map((o, i) => `
+    <div class="feed-item ${i === 0 && isNew ? 'is-new' : 'is-old'}">
+      <span class="feed-dot ${i === 0 && isNew ? 'active' : 'idle'}"></span>
+      <div style="flex:1;min-width:0">
+        <div class="feed-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.restaurant}</div>
+        <div class="feed-sub">${o.area} &bull; ${o.time}</div>
+      </div>
+      <div class="feed-right">
+        <div class="feed-amt">₹${Math.round(o.amount).toLocaleString()}</div>
+        <span class="feed-pill" style="${statusPill(o.status)}">${o.status}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ═══ FOOD TRENDS ═══════════════════════════════════════════════════════════
+// ── Reliable Unsplash image map for Indian dishes ──────────────────────────
+const DISH_IMAGES = {
+  'butter chicken':     'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=400&q=80',
+  'dal makhani':        'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&q=80',
+  'paneer tikka':       'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d6?w=400&q=80',
+  'amritsari kulcha':   'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80',
+  'sarson da saag':     'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&q=80',
+  'chicken tikka masala':'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80',
+  'rajma chawal':       'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&q=80',
+  'lassi':              'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80',
+  'biryani':            'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80',
+  'chole bhature':      'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&q=80',
+  'aloo paratha':       'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=400&q=80',
+  'tandoori chicken':   'https://images.unsplash.com/photo-1598514982901-8d0df55ad5dd?w=400&q=80',
+  'gulab jamun':        'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&q=80',
+  'pani puri':          'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400&q=80',
+  'palak paneer':       'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=400&q=80',
+  'default':            'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80',
+};
+
+// Guaranteed fallback data if API fails / returns < 12 items
+const FALLBACK_TRENDS = [
+  { title:'Butter Chicken',      calories:320, protein:28, ready_in:30, servings:4 },
+  { title:'Dal Makhani',         calories:250, protein:12, ready_in:45, servings:4 },
+  { title:'Paneer Tikka',        calories:280, protein:18, ready_in:25, servings:2 },
+  { title:'Amritsari Kulcha',    calories:380, protein:10, ready_in:20, servings:2 },
+  { title:'Sarson Da Saag',      calories:190, protein:8,  ready_in:60, servings:4 },
+  { title:'Chicken Tikka Masala',calories:350, protein:32, ready_in:35, servings:4 },
+  { title:'Rajma Chawal',        calories:420, protein:15, ready_in:40, servings:3 },
+  { title:'Lassi',               calories:150, protein:6,  ready_in:5,  servings:1 },
+  { title:'Biryani',             calories:480, protein:25, ready_in:50, servings:4 },
+  { title:'Chole Bhature',       calories:540, protein:16, ready_in:35, servings:2 },
+  { title:'Tandoori Chicken',    calories:310, protein:35, ready_in:40, servings:3 },
+  { title:'Gulab Jamun',         calories:175, protein:4,  ready_in:30, servings:6 },
+];
+
+function getImage(title, apiImg) {
+  // Use API image if it's a real URL (not blank/undefined)
+  if (apiImg && apiImg.startsWith('http')) return apiImg;
+  // Lookup by keyword in title
+  const key = title.toLowerCase();
+  for (const [k, url] of Object.entries(DISH_IMAGES)) {
+    if (key.includes(k)) return url;
+  }
+  return DISH_IMAGES['default'];
+}
+
+function renderTrends(items) {
+  const grid = document.getElementById('trendGrid');
+  grid.innerHTML = items.map(f => {
+    const imgUrl = getImage(f.title, f.image);
+    return `
+    <div class="trend-card-pro">
+      <img class="trend-thumb"
+           src="${imgUrl}"
+           alt="${f.title}"
+           onerror="this.src='${DISH_IMAGES['default']}'">
+      <div class="trend-body">
+        <div class="trend-title">${f.title}</div>
+        <div class="trend-meta">
+          <span class="trend-kcal">🔥 ${Math.round(f.calories)} kcal</span>
+          <span class="trend-info">💪 Protein: ${Math.round(f.protein)}g</span>
+          <span class="trend-info">⏱️ ${f.ready_in} min &nbsp;·&nbsp; 👤 ${f.servings} srv</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadFoodTrends() {
+  fetch('/api/food-trends')
+    .then(r => r.json())
+    .then(d => {
+      const stat = document.getElementById('apiStatus');
+      let items = (d.trends && d.trends.length) ? d.trends : [];
+
+      if (items.length >= 8) {
+        stat.textContent = '✅ API Connected';
+        stat.style.cssText = 'background:rgba(74,222,128,.12);color:#86EFAC;font-size:.72rem;padding:3px 12px;border-radius:20px;font-weight:700;margin-left:auto';
+      } else {
+        // Pad with fallback items if API returns too few
+        const needed = 12 - items.length;
+        const extra  = FALLBACK_TRENDS.filter(fb =>
+          !items.some(i => i.title.toLowerCase() === fb.title.toLowerCase())
+        ).slice(0, needed);
+        items = [...items, ...extra];
+        stat.textContent = '⚡ Cached Data';
+        stat.style.cssText = 'background:rgba(245,158,11,.12);color:#FCD34D;font-size:.72rem;padding:3px 12px;border-radius:20px;font-weight:700;margin-left:auto';
+      }
+
+      renderTrends(items.slice(0, 15));
+    })
+    .catch(() => {
+      const stat = document.getElementById('apiStatus');
+      stat.textContent = '⚡ Cached Data';
+      stat.style.cssText = 'background:rgba(245,158,11,.12);color:#FCD34D;font-size:.72rem;padding:3px 12px;border-radius:20px;font-weight:700;margin-left:auto';
+      renderTrends(FALLBACK_TRENDS);
+    });
+}
+
+// ═══ MAIN POLL ══════════════════════════════════════════════════════════════
+function fetchAndUpdate() {
+  fetch('/api/live-stats')
+    .then(r => r.json())
+    .then(d => {
+      updateStats(d);
+      updateRevenue(d.rev7);
+      updateStatus(d.status_data);
+      updateTopRests(d.top_rests);
+      updateArea(d.area_data);
+      updatePay(d.pay_data);
+      updateHour(d.hour_data);
+      updateFeed(d.live_feed);
+    })
+    .catch(e => console.error('Dashboard fetch error:', e));
+}
+
+// ═══ INIT ═══════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  mkRevenueChart();
+  mkStatusChart();
+  mkAreaChart();
+  mkPayChart();
+  mkHourChart();
+  fetchAndUpdate();
+  loadFoodTrends();
+  setInterval(fetchAndUpdate, 30000);
+  setInterval(loadFoodTrends, 600000);
+});
+</script>
+{% endblock %}

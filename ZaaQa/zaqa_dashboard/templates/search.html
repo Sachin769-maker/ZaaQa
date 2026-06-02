@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Search — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.s-hero{background:linear-gradient(135deg,#1C1C1E,#2D2D2D);border-radius:24px;padding:36px;color:#fff;margin-bottom:28px}
+.big-search{background:#1A3530;border-radius:60px;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 20px;box-shadow:0 8px 32px rgba(0,0,0,.15);margin-top:20px}
+.big-search input{border:none;outline:none;font-family:inherit;font-size:1rem;flex:1;background:transparent;color:#E8EDE8}
+.big-search button{background:var(--or);color:#fff;border:none;border-radius:50px;padding:10px 26px;font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit}
+.f-chip{background:#1A3530;border:2px solid rgba(255,255,255,0.10);border-radius:40px;padding:7px 16px;font-size:.84rem;font-weight:600;cursor:pointer;font-family:inherit;color:#E8EDE8}
+.r-card{background:#1A3530;border-radius:18px;border:1.5px solid rgba(255,255,255,0.10);overflow:hidden;transition:.26s}
+.r-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(255,82,0,.12);border-color:rgba(232,169,69,0.35)}
+.r-img{width:100%;height:140px;object-fit:cover}.r-img-ph{width:100%;height:140px;background:linear-gradient(135deg,#1F3D38,#2A4D46);display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.i-row{background:#1A3530;border-radius:14px;border:1.5px solid rgba(255,255,255,0.10);padding:14px 18px;display:flex;align-items:center;gap:14px;transition:.2s;margin-bottom:8px}
+.i-row:hover{border-color:rgba(232,169,69,0.35)}
+.i-img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.i-img-ph{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,#1F3D38,#2A4D46);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+</style>
+{% endblock %}
+{% block content %}
+<div class="s-hero rise">
+  <h2 style="font-family:'Clash Display',sans-serif;font-size:1.8rem">🔍 Advanced Search</h2>
+  <p style="opacity:.7;margin:6px 0 0">Find restaurants, dishes, or cuisines</p>
+  <form method="GET" action="{{ url_for('advanced_search') }}">
+    <div class="big-search">
+      <i class="fas fa-search" style="color:rgba(255,255,255,0.45);flex-shrink:0"></i>
+      <input type="text" name="q" placeholder="Search restaurant, dish, or cuisine..." value="{{ query }}"/>
+      <button type="submit">Search</button>
+    </div>
+  </form>
+</div>
+<form method="GET" action="{{ url_for('advanced_search') }}" class="d-flex gap-2 flex-wrap mb-4 rise-1">
+  <input type="hidden" name="q" value="{{ query }}"/>
+  <select name="cuisine" class="f-chip" onchange="this.form.submit()">
+    <option value="">All Cuisines</option>
+    {% for c in cuisines %}<option value="{{ c }}" {% if cuisine==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+  </select>
+  <select name="min_rating" class="f-chip" onchange="this.form.submit()">
+    <option value="">Any Rating</option>
+    <option value="4.5" {% if min_r=='4.5' %}selected{% endif %}>⭐ 4.5+</option>
+    <option value="4.0" {% if min_r=='4.0' %}selected{% endif %}>⭐ 4.0+</option>
+    <option value="3.5" {% if min_r=='3.5' %}selected{% endif %}>⭐ 3.5+</option>
+  </select>
+  <select name="sort" class="f-chip" onchange="this.form.submit()">
+    <option value="rating" {% if sort_by=='rating' %}selected{% endif %}>Sort: Rating</option>
+    <option value="delivery" {% if sort_by=='delivery' %}selected{% endif %}>Sort: Delivery</option>
+  </select>
+</form>
+{% if query or cuisine or min_r %}
+  {% if rest_results %}
+  <h6 style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:14px" class="rise-2">🏪 Restaurants ({{ rest_results|length }})</h6>
+  <div class="row g-3 mb-4 rise-2">
+    {% for r in rest_results %}
+    <div class="col-sm-6 col-lg-4">
+      <a href="{{ url_for('restaurant_menu',restaurant_id=r.id) }}" style="text-decoration:none">
+        <div class="r-card">
+          {% if r.image_url %}<img src="{{ r.image_url }}" class="r-img" onerror="this.parentElement.innerHTML='<div class=r-img-ph>🏪</div>'"/>{% else %}<div class="r-img-ph">🏪</div>{% endif %}
+          <div style="padding:14px 16px">
+            <div style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:3px">{{ r.name }}</div>
+            <div style="font-size:.8rem;color:rgba(255,255,255,0.45);margin-bottom:8px">{{ r.cuisine }}</div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:rgba(255,255,255,0.45)">
+              <span><i class="fas fa-star" style="color:#F59E0B"></i> {{ r.rating }}</span>
+              <span><i class="fas fa-clock"></i> {{ r.delivery_time }}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if item_results %}
+  <h6 style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:14px" class="rise-3">🍽️ Dishes ({{ item_results|length }})</h6>
+  {% for item in item_results %}
+  <a href="{{ url_for('restaurant_menu',restaurant_id=item.restaurant_id_str) }}" style="text-decoration:none">
+    <div class="i-row rise-3">
+      {% if item.image_url %}<img src="{{ item.image_url }}" class="i-img" onerror="this.outerHTML='<div class=i-img-ph>🍽️</div>'"/>{% else %}<div class="i-img-ph">🍽️</div>{% endif %}
+      <div style="flex:1"><div style="font-weight:700;font-size:.93rem">{{ item.name }}</div><div style="font-size:.78rem;color:rgba(255,255,255,0.45)">{{ item.restaurant_name }} • {{ item.category }}</div></div>
+      <div style="font-family:'Clash Display',sans-serif;font-weight:700;color:var(--or)">₹{{ item.price|int }}</div>
+    </div>
+  </a>
+  {% endfor %}
+  {% endif %}
+  {% if not rest_results and not item_results %}
+  <div class="text-center py-5 rise-2"><div style="font-size:4rem;margin-bottom:14px">🔍</div><h5 style="font-family:'Clash Display',sans-serif">No results found</h5></div>
+  {% endif %}
+{% else %}
+<div class="text-center py-5 rise-2"><div style="font-size:4.5rem;margin-bottom:14px">🔍</div><h5 style="font-family:'Clash Display',sans-serif">Search for anything!</h5><p style="color:rgba(255,255,255,0.45)">Restaurants, dishes, cuisines — find it all</p></div>
+{% endif %}
+{% endblock %}

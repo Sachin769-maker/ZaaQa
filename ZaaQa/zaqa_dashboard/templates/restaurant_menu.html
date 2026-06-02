@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block title %}{{ restaurant.name }} — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.rest-header{background:linear-gradient(145deg,#FF5200,#FF7040 60%,#FFAD6B);border-radius:24px;padding:32px 36px;color:#fff;margin-bottom:28px;position:relative;overflow:hidden}
+.rest-header::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;background:rgba(255,255,255,.08);border-radius:50%}
+.rest-header h2{font-family:'Clash Display',sans-serif;font-size:1.9rem;position:relative;z-index:1}
+.rest-header p,.info-chip{position:relative;z-index:1}
+.info-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.25);border-radius:40px;padding:5px 15px;font-size:.8rem;font-weight:600;backdrop-filter:blur(8px)}
+
+/* CATEGORY TABS */
+.cat-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:28px;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-tab{
+  background:#1A3530;border:2px solid rgba(255,255,255,0.10);color:rgba(255,255,255,0.45);
+  border-radius:40px;padding:8px 22px;font-size:.85rem;font-weight:700;
+  cursor:pointer;white-space:nowrap;transition:.22s;flex-shrink:0;
+  font-family:inherit;
+}
+.cat-tab:hover{border-color:#FF5200;color:#FF5200}
+.cat-tab.active{background:#FF5200;border-color:#FF5200;color:#fff;box-shadow:0 4px 14px rgba(255,82,0,.3)}
+
+/* MENU CARDS */
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.m-card{background:#1A3530;border-radius:18px;border:1.5px solid rgba(255,255,255,0.10);overflow:hidden;transition:.26s cubic-bezier(.22,1,.36,1)}
+.m-card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(255,82,0,.13);border-color:rgba(232,169,69,0.35)}
+.m-img-wrap{height:155px;overflow:hidden}
+.m-img{width:100%;height:100%;object-fit:cover;transition:.38s}
+.m-card:hover .m-img{transform:scale(1.07)}
+.m-img-ph{width:100%;height:155px;background:linear-gradient(135deg,#1F3D38,#2A4D46);display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.m-body{padding:13px 15px 15px}
+.m-cat{background:rgba(232,169,69,0.12);color:#FF5200;border-radius:40px;padding:3px 12px;font-size:.72rem;font-weight:700;display:inline-block;margin-bottom:8px}
+.m-name{font-family:'Clash Display',sans-serif;font-size:1rem;font-weight:700;color:#fff;margin-bottom:4px}
+.m-desc{font-size:.79rem;color:rgba(255,255,255,0.45);line-height:1.45;margin-bottom:12px}
+.m-footer{display:flex;align-items:center;justify-content:space-between}
+.m-price{font-family:'Clash Display',sans-serif;font-size:1.15rem;font-weight:700;color:#FF5200}
+.add-btn{
+  background:#FF5200;color:#fff;border:none;border-radius:10px;
+  padding:7px 18px;font-family:inherit;font-size:.84rem;font-weight:700;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;gap:5px;
+}
+.add-btn:hover{background:#E04800;transform:scale(1.06)}
+.add-btn:active{transform:scale(.96)}
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="rest-header rise">
+  <a href="{{ url_for('restaurants') }}" style="display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.8);font-size:.85rem;font-weight:600;margin-bottom:14px">
+    <i class="fas fa-arrow-left"></i>Restaurants
+  </a>
+  <h2>{{ restaurant.name }}</h2>
+  <p style="opacity:.8;font-size:.9rem;margin-bottom:14px">{{ restaurant.address }}</p>
+  <div class="d-flex gap-2 flex-wrap">
+    <span class="info-chip"><i class="fas fa-star" style="color:#FFD700"></i>{{ restaurant.rating }}</span>
+    <span class="info-chip"><i class="fas fa-clock"></i>{{ restaurant.delivery_time }}</span>
+    <span class="info-chip"><i class="fas fa-utensils"></i>{{ restaurant.cuisine }}</span>
+    {% if restaurant.min_order > 0 %}<span class="info-chip"><i class="fas fa-rupee-sign"></i>Min ₹{{ restaurant.min_order|int }}</span>{% endif %}
+  </div>
+</div>
+
+<!-- Category Tabs -->
+{% if categories %}
+<div class="cat-scroll rise-1">
+  <button class="cat-tab active" onclick="filterCat('all',this)">🍽️ All</button>
+  {% for cat in categories %}
+  <button class="cat-tab" onclick="filterCat('{{ cat }}',this)">{{ cat }}</button>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Menu -->
+{% if items %}
+<div class="menu-grid rise-2" id="menuGrid">
+  {% for item in items %}
+  <div class="m-card menu-item" data-category="{{ item.category }}">
+    <div class="m-img-wrap">
+      {% if item.image_url %}
+        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="m-img"
+             onerror="this.parentElement.innerHTML='<div class=m-img-ph>🍽️</div>'"/>
+      {% else %}<div class="m-img-ph">🍽️</div>{% endif %}
+    </div>
+    <div class="m-body">
+      <span class="m-cat">{{ item.category }}</span>
+      <div class="m-name">{{ item.name }}</div>
+      <div class="m-desc">{{ item.description }}</div>
+      <div class="m-footer">
+        <span class="m-price">₹{{ "%.0f"|format(item.price) }}</span>
+        <form method="POST" action="{{ url_for('add_to_cart', item_id=item.id) }}">
+          <button type="submit" class="add-btn"><i class="fas fa-plus"></i>{{ t('add_to_cart') }}</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5 rise-2">
+  <div style="font-size:4rem;margin-bottom:12px">🍽️</div>
+  <h5 style="font-family:'Clash Display',sans-serif">Menu abhi available nahi</h5>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script>
+function filterCat(cat,el){
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(item=>{
+    const show=cat==='all'||item.dataset.category===cat;
+    item.style.display=show?'':'none';
+    if(show){item.style.animation='none';void item.offsetWidth;item.style.animation='riseUp .35s both'}
+  });
+}
+</script>
+{% endblock %}

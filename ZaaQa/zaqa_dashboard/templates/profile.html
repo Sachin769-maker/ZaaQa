@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — ZaaQa{% endblock %}
+{% block extra_css %}
+<style>
+.p-hero{background:linear-gradient(135deg,#FF5200,#FF8C42);border-radius:24px;padding:32px;color:#fff;margin-bottom:28px;display:flex;align-items:center;gap:20px}
+.avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0}
+.stat-box{background:#1A3530;border-radius:16px;border:1.5px solid rgba(255,255,255,0.10);padding:20px;text-align:center}
+.stat-val{font-family:'Clash Display',sans-serif;font-size:1.6rem;font-weight:700;color:var(--or)}
+.f-wrap{position:relative;margin-bottom:14px}
+.f-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.45);font-size:.88rem}
+.f-wrap input,.f-wrap textarea{width:100%;border:2px solid rgba(255,255,255,0.10);border-radius:12px;padding:12px 14px 12px 40px;font-family:inherit;font-size:.93rem;background:#162E29;color:#E8EDE8;transition:.2s;outline:none;resize:none}
+.f-wrap input:focus,.f-wrap textarea:focus{border-color:var(--or);background:#1A3530;box-shadow:0 0 0 4px rgba(255,82,0,.1)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="p-hero rise">
+  <div class="avatar">{{ session.user_name[0]|upper if session.user_name else '?' }}</div>
+  <div>
+    <h3 style="font-family:'Clash Display',sans-serif;font-size:1.6rem;margin-bottom:4px">{{ user.name }}</h3>
+    <p style="opacity:.8;font-size:.9rem;margin:0">{{ user.email }}</p>
+    <p style="opacity:.7;font-size:.82rem;margin-top:4px">Member since {{ user.created_at.strftime('%B %Y') if user.created_at is not string else '' }}</p>
+  </div>
+</div>
+<div class="row g-3 mb-4 rise-1">
+  <div class="col-4"><div class="stat-box"><div class="stat-val">{{ order_count }}</div><div style="font-size:.8rem;color:rgba(255,255,255,0.45);margin-top:4px">Total Orders</div></div></div>
+  <div class="col-4"><div class="stat-box"><div class="stat-val">₹{{ total_spent|int }}</div><div style="font-size:.8rem;color:rgba(255,255,255,0.45);margin-top:4px">Total Spent</div></div></div>
+  <div class="col-4"><div class="stat-box"><div class="stat-val">{{ '⭐' if order_count > 5 else '🆕' }}</div><div style="font-size:.8rem;color:rgba(255,255,255,0.45);margin-top:4px">{{ 'Regular' if order_count > 5 else 'New User' }}</div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-md-7">
+    <div class="z-card p-4 rise-2">
+      <h6 style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:20px">✏️ Edit Profile</h6>
+      <form method="POST">
+        <div class="f-wrap"><i class="fas fa-user"></i><input type="text" name="name" value="{{ user.name }}" placeholder="Full Name" required/></div>
+        <div class="f-wrap"><i class="fas fa-phone"></i><input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="Phone Number"/></div>
+        <div class="f-wrap"><i class="fas fa-map-marker-alt" style="top:14px;transform:none"></i><textarea name="address" rows="2" style="padding-top:12px" placeholder="Delivery Address">{{ user.address or '' }}</textarea></div>
+        <hr style="border-color:rgba(255,255,255,0.1);margin:18px 0"/>
+        <p style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:12px">Change Password (leave blank to keep current)</p>
+        <div class="f-wrap"><i class="fas fa-lock"></i><input type="password" name="current_password" placeholder="Current Password"/></div>
+        <div class="f-wrap"><i class="fas fa-key"></i><input type="password" name="new_password" placeholder="New Password" minlength="6"/></div>
+        <button type="submit" class="btn-z w-100 justify-content-center mt-2" style="padding:13px">Save Changes ✅</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="z-card p-4 rise-3">
+      <h6 style="font-family:'Clash Display',sans-serif;font-weight:700;margin-bottom:16px">⚡ Quick Links</h6>
+      {% for href,icon,label,color in [
+        (url_for('my_orders'),'fas fa-receipt','My Orders','var(--or)'),
+        (url_for('notifications'),'fas fa-bell','Notifications','var(--or)'),
+        (url_for('offers'),'fas fa-tag','Offers & Coupons','var(--or)'),
+        (url_for('health_check'),'fas fa-heartbeat','Health Guide','#16A34A'),
+      ] %}
+      <a href="{{ href }}" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.10);color:#E8EDE8;font-weight:600;font-size:.9rem;transition:.2s;margin-bottom:8px;text-decoration:none" onmouseover="this.style.borderColor='{{ color }}'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <i class="{{ icon }}" style="color:{{ color }}"></i>{{ label }}
+      </a>
+      {% endfor %}
+      <a href="{{ url_for('logout') }}" style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;border:1.5px solid rgba(239,68,68,0.3);color:#EF4444;font-weight:600;font-size:.9rem;transition:.2s;text-decoration:none" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background=''">
+        <i class="fas fa-sign-out-alt"></i>Logout
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

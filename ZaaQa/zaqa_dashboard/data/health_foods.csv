@@ -1,0 +1,25 @@
+name,category,kcal,protein_g,carbs_g,fat_g,description,tags
+Green Tea,Beverage,2,0,0,0,Beverage — Good for BP and diabetes,low_sodium,low_sugar,low_gi
+Cucumber,Vegetable,16,1,3,0,Hydrating and low-calorie,low_sodium,low_sugar,low_gi
+Zucchini,Vegetable,17,1,3,0,Low calorie,low_sodium,low_sugar,low_gi
+Tomatoes,Vegetable,22,1,5,0,Rich in antioxidants,low_sodium,low_sugar
+Spinach,Vegetable,23,3,4,0,Excellent micronutrient density,low_sodium,iron_rich,low_sugar
+Leafy Greens,Vegetable,25,3,4,0,Low-calorie potassium-rich,low_sodium,low_sugar,low_gi
+Cabbage,Vegetable,25,1,6,0,High fibre low cal,low_sodium,low_sugar
+Cauliflower,Vegetable,27,2,5,0,Low carb substitute,low_sodium,low_sugar,low_gi
+Oats,Grain,68,2,12,1,Slow-release energy,low_gi,low_sugar
+Brown Rice,Grain,111,3,23,1,Complex carbohydrates,low_gi,low_sodium
+Lentils,Legume,116,9,20,0,Protein and fibre rich,low_gi,iron_rich,low_sugar
+Chickpeas,Legume,164,9,27,3,High protein legume,low_gi,iron_rich
+Almonds,Nuts,164,6,6,14,Healthy fats heart friendly,low_sodium,low_sugar
+Walnuts,Nuts,185,4,4,18,Omega-3 brain food,low_sodium,low_sugar
+Banana,Fruit,89,1,23,0,Potassium boost for low BP,iron_rich
+Apple,Fruit,52,0,14,0,Fibre rich low GI fruit,low_gi,low_sugar
+Papaya,Fruit,43,0,11,0,Digestive enzymes and vitamins,low_sugar,low_gi
+Pomegranate,Fruit,83,2,19,1,Antioxidant heart health,low_sodium
+Grilled Chicken,Protein,165,31,0,4,Lean protein source,low_sodium,low_sugar
+Egg Whites,Protein,52,11,1,0,Pure low-fat protein,low_sodium,low_sugar
+Fish (Salmon),Protein,208,20,0,13,Omega-3 heart healthy,low_sugar
+Tofu,Protein,76,8,2,4,Plant protein low cal,low_sodium,low_sugar,low_gi
+Low-fat Yoghurt,Dairy,59,10,3,0,Probiotic calcium rich,low_sugar
+Buttermilk,Dairy,40,3,5,1,Cooling probiotic drink,low_sodium,low_sugar

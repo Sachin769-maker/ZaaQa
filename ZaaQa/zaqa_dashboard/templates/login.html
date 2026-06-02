@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ur' else 'ltr' }}">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Login — ZaaQa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"/>
+  <style>
+    /* Restore DM Sans after bootstrap (font awesome uses its own font-family: FontAwesome) */
+    body, input, button, a, p, h1, h2, h3, h4, h5, h6 {
+      font-family: 'DM Sans', sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--or:#FF5200;--gold:#D4881A;--gold2:#FFD580;--border:#E2DDD8;--muted:#7A8080}
+    body{font-family:'DM Sans',sans-serif;min-height:100vh;display:block;overflow-x:hidden}
+    .login-wrapper{display:grid;grid-template-columns:56% 44%;min-height:100vh}
+
+    /*** LEFT ***/
+    .left{position:relative;overflow:hidden;min-height:100vh;background:#000}
+    .left-bg{display:none} /* image removed */
+
+    /* Video — portrait 9:16 in landscape panel: top & bottom crop only, zero left-right zoom */
+    .left-video{
+      position:absolute;
+      z-index:0;
+      top:0;left:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center 35%;
+      filter:brightness(0.90) contrast(1.10) saturate(1.20);
+    }
+    .left-overlay{
+      position:absolute;inset:0;z-index:1;
+      background:
+        linear-gradient(180deg,
+          rgba(10,6,2,0.40) 0%,
+          rgba(10,6,2,0.08) 18%,
+          rgba(10,6,2,0.02) 46%,
+          rgba(10,6,2,0.08) 72%,
+          rgba(10,6,2,0.42) 100%),
+        linear-gradient(90deg, rgba(10,6,2,0.12) 0%, transparent 40%);
+    }
+    .top-stripe{position:absolute;top:0;left:0;right:0;height:3px;z-index:10;
+      background:linear-gradient(90deg,transparent,#c8a84b 20%,#FF5200 50%,#D4881A 78%,transparent)}
+
+    .left-content{
+      position:relative;z-index:10;
+      display:flex;flex-direction:column;justify-content:space-between;
+      height:100%;min-height:100vh;padding:42px 52px;
+    }
+
+    /* Logo */
+    .logo{display:flex;align-items:center;gap:13px}
+    .logo-icon{width:48px;height:48px;background:rgba(255,255,255,0.95);border-radius:14px;
+      display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+      border:1.5px solid rgba(212,136,26,0.55);box-shadow:0 3px 18px rgba(0,0,0,0.3)}
+    .logo-name{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:800;color:#fff;
+      letter-spacing:-0.5px;text-shadow:0 2px 16px rgba(0,0,0,0.6)}
+
+    /* Hero copy */
+    .hero{display:flex;flex-direction:column;gap:0}
+    .hero-pill{
+      display:inline-flex;align-items:center;gap:8px;width:fit-content;margin-bottom:20px;
+      background:rgba(212,136,26,0.18);border:1.5px solid rgba(212,136,26,0.55);
+      color:#FFD580;font-size:.72rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+      padding:7px 20px;border-radius:50px;backdrop-filter:blur(10px);
+    }
+    .hero-h1{font-family:'Playfair Display',serif;font-size:4.4rem;font-weight:900;color:#fff;
+      line-height:0.95;margin-bottom:14px;text-shadow:0 4px 40px rgba(0,0,0,0.8)}
+    .hero-h1 .italic-gold{color:#FFD580;font-style:italic}
+    .hero-desc{color:rgba(255,255,255,.72);font-size:.93rem;line-height:1.65;
+      margin-bottom:30px;text-shadow:0 1px 10px rgba(0,0,0,0.55);max-width:380px}
+
+    /* Stat chips */
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{
+      display:flex;align-items:center;gap:9px;
+      background:rgba(0,0,0,0.42);border:1.5px solid rgba(255,255,255,0.20);
+      border-radius:14px;padding:10px 17px;
+      backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+      transition:.25s ease;cursor:default;
+    }
+    .chip:hover{background:rgba(212,136,26,0.32);border-color:rgba(212,136,26,0.65);transform:translateY(-3px)}
+    .chip-ico{font-size:1.15rem}
+    .chip-txt{display:flex;flex-direction:column;line-height:1.25}
+    .chip-label{font-size:.82rem;font-weight:700;color:#fff}
+    .chip-sub{font-size:.67rem;color:rgba(255,255,255,.58)}
+
+    /*** RIGHT ***/
+    .right{
+      background:#FFFFFF;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:50px 60px;gap:20px;position:relative;overflow:hidden;
+    }
+
+    /* Soft warm radial behind form */
+    .right::before{
+      content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);
+      width:460px;height:280px;border-radius:50%;
+      background:radial-gradient(ellipse,rgba(212,136,26,0.08) 0%,transparent 68%);
+      pointer-events:none;
+    }
+
+    /* Corner leaves removed */
+    .clef{display:none!important}
+
+    /* Tagline strip */
+    .tagline-strip{width:100%;max-width:480px;z-index:1;display:flex;flex-direction:column;gap:9px}
+    .tl-pill{
+      display:inline-flex;align-items:center;gap:7px;width:fit-content;
+      background:linear-gradient(135deg,rgba(212,136,26,0.12),rgba(255,82,0,0.07));
+      border:1.5px solid rgba(212,136,26,0.32);border-radius:50px;padding:5px 15px;
+    }
+    .tl-pill span{font-size:.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+    .tl-h{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:900;color:#1A1A1A;line-height:1.35}
+    .tl-h em{color:var(--or);font-style:italic}
+    .tl-p{font-size:1.05rem;color:#1A1A1A;line-height:1.65;border-left:2.5px solid rgba(212,136,26,0.42);padding-left:10px}
+    .tl-rule{width:100%;height:1px;background:linear-gradient(90deg,rgba(212,136,26,0.30),rgba(255,82,0,0.16),transparent)}
+
+    /* Form card */
+    .form-card{width:100%;max-width:480px;z-index:1}
+    .eyebrow{display:flex;align-items:center;gap:9px;margin-bottom:10px;
+      font-size:.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+    .eyebrow::before{content:'';width:22px;height:2px;background:var(--gold);border-radius:2px}
+    .form-card h2{font-family:'Playfair Display',serif;font-size:2.5rem;color:#1A1A1A;
+      margin-bottom:5px;line-height:1.15;font-weight:900}
+    .form-card .sub{color:#1A1A1A;font-size:1rem;margin-bottom:26px;line-height:1.5}
+
+    .fld{position:relative;margin-bottom:13px;isolation:isolate}
+    .fld i{position:absolute;left:16px;top:50%;transform:translateY(-50%);
+      color:#B8C0BE;font-size:.84rem;z-index:2;pointer-events:none}
+    .fld input{
+      width:100%;border:1.5px solid var(--border);border-radius:13px;
+      padding:13.5px 16px 13.5px 45px;
+      font-family:inherit;font-size:1rem;background:#F8F5F1;color:#1A1A1A;
+      transition:.22s;outline:none;position:relative;z-index:1;
+    }
+    .fld input::placeholder{color:#B8C0BE}
+    .fld input:focus{border-color:rgba(212,136,26,.58);background:#FFFBF4;box-shadow:0 0 0 4px rgba(212,136,26,.10)}
+
+    .btn-or{
+      width:100%;margin-top:7px;
+      background:linear-gradient(135deg,#FF5200 0%,#FF7A3D 100%);
+      color:#fff;border:none;border-radius:13px;padding:14.5px;
+      font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      box-shadow:0 6px 24px rgba(255,82,0,.28);transition:.25s;
+    }
+    .btn-or:hover{background:linear-gradient(135deg,#E04500 0%,#FF5200 100%);
+      transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,82,0,.38)}
+    .btn-or i{transition:.25s}.btn-or:hover i{transform:translateX(6px)}
+
+    .divider{display:flex;align-items:center;gap:12px;color:#C4BDB6;font-size:.82rem;margin:16px 0}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#ECE6DF}
+    .link-row{text-align:center;font-size:.88rem;color:var(--muted)}
+    .link-row a{color:var(--or);font-weight:700;text-decoration:none}
+    .link-row a:hover{color:#D04400}
+
+    .alert{border:none;border-radius:11px;padding:12px 16px;font-size:.87rem;
+      font-weight:500;margin-bottom:16px}
+    .alert-danger{background:#FEF2F2;color:#DC2626;border:1px solid #FCA5A5}
+    .alert-success{background:#F0FDF4;color:#16A34A;border:1px solid #86EFAC}
+
+    /* Bottom strip */
+    .bottom-strip{width:100%;max-width:480px;z-index:1;display:flex;flex-direction:column;align-items:center;gap:14px}
+    .sep{width:100%;height:1px;background:#ECE6DF}
+    .lang-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+    .lang-a{
+      display:flex;align-items:center;gap:5px;padding:6px 16px;border-radius:50px;
+      border:1.5px solid var(--border);font-size:.9rem;font-weight:600;color:#555;
+      text-decoration:none;background:#F8F5F1;transition:.2s;
+    }
+    .lang-a:hover,.lang-a.active{border-color:rgba(212,136,26,.55);color:var(--gold);background:#FFF7E8}
+
+    .trust{display:flex;align-items:center;justify-content:center;gap:14px}
+    .trust-item{display:flex;align-items:center;gap:6px;font-size:.85rem;color:#555;font-weight:500}
+    .tdot{width:3px;height:3px;border-radius:50%;background:#D4CCC4}
+
+    /* ══════════════════════════════════════════
+       STAGGERED ENTRANCE ANIMATIONS
+    ══════════════════════════════════════════ */
+
+    /* Base hidden state */
+    [data-anim]{
+      opacity:0;
+      will-change:transform,opacity;
+    }
+    /* Slide up */
+    [data-anim="up"]    { transform:translateY(28px); }
+    /* Slide left */
+    [data-anim="left"]  { transform:translateX(-32px); }
+    /* Slide right */
+    [data-anim="right"] { transform:translateX(32px); }
+    /* Scale in */
+    [data-anim="scale"] { transform:scale(0.88); }
+
+    /* Animated state */
+    [data-anim].is-visible{
+      opacity:1;
+      transform:none;
+      transition:opacity 0.55s cubic-bezier(0.22,1,0.36,1),
+                 transform 0.55s cubic-bezier(0.22,1,0.36,1);
+      transition-delay:var(--d,0ms);
+    }
+
+    @media(max-width:900px){
+      .login-wrapper{grid-template-columns:1fr}
+      .left{min-height:50vh}.left-content{padding:36px 30px}.hero-h1{font-size:3.1rem}
+      .right{padding:44px 30px}
+    }
+    @media(max-width:500px){
+      .left{min-height:44vh}.hero-h1{font-size:2.5rem}.right{padding:36px 18px}
+    }
+
+    /* ═══════════ ABOUT / SCROLL SECTION ═══════════ */
+    .about-section{
+      background:#FFFFFF;
+      padding:90px 0 0 0;
+    }
+
+    /* ── "Better food for more people" hero ── */
+    .about-hero{
+      position:relative;
+      text-align:center;
+      padding:80px 20px 90px;
+      background:#fff;
+      overflow:hidden;
+    }
+    .about-hero-title{
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.4rem,4.5vw,3.8rem);
+      font-weight:900;
+      color:#FF5200;
+      line-height:1.15;
+      margin-bottom:22px;
+      position:relative;z-index:2;
+    }
+    .about-hero-sub{
+      font-size:1.3rem;
+      color:#1A1A1A;
+      max-width:600px;
+      margin:0 auto;
+      line-height:1.75;
+      position:relative;z-index:2;
+    }
+    /* floating food images around the text */
+    .float-food{
+      position:absolute;
+      object-fit:cover;
+      border-radius:50%;
+      box-shadow:0 12px 40px rgba(0,0,0,0.14);
+      pointer-events:none;
+    }
+    .ff1{width:200px;height:200px;top:15%;left:6%;border-radius:20px}
+    .ff2{width:170px;height:170px;top:6%;right:8%;border-radius:50%}
+    .ff3{width:150px;height:150px;bottom:10%;left:12%;border-radius:50%}
+    .ff4{width:180px;height:180px;bottom:10%;right:6%;border-radius:20px}
+    @media(max-width:900px){.float-food{display:none}}
+
+    /* ── Specialities cards (like Zomato's app cards) ── */
+    .specialities-section{
+      background:#f8f8f8;
+      padding:80px 60px;
+      text-align:center;
+    }
+    .sec-eyebrow{
+      font-size:.9rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+      color:var(--gold);margin-bottom:10px;
+    }
+    .sec-title{
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.2rem,4vw,3.4rem);
+      font-weight:900;color:#1A1A1A;
+      margin-bottom:12px;line-height:1.2;
+    }
+    .sec-sub{color:#1A1A1A;font-size:1.2rem;max-width:600px;margin:0 auto 55px;line-height:1.7}
+
+    .spec-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:24px;
+      max-width:1100px;margin:0 auto;
+    }
+    .spec-card{
+      background:#fff;
+      border-radius:22px;
+      padding:36px 26px 32px;
+      text-align:center;
+      box-shadow:0 4px 24px rgba(0,0,0,0.06);
+      border:1.5px solid #F0EBE3;
+      transition:.3s ease;
+      cursor:default;
+    }
+    .spec-card:hover{
+      transform:translateY(-8px);
+      box-shadow:0 16px 48px rgba(255,82,0,0.12);
+      border-color:rgba(255,82,0,0.25);
+    }
+    .spec-icon{
+      width:72px;height:72px;border-radius:18px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.9rem;margin:0 auto 20px;
+    }
+    .spec-name{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;color:#1A1A1A;margin-bottom:10px}
+    .spec-desc{font-size:1.05rem;color:#1A1A1A;line-height:1.65;margin-bottom:22px}
+    .spec-link{
+      font-size:.95rem;font-weight:700;color:var(--or);text-decoration:none;
+      display:inline-flex;align-items:center;gap:6px;
+      border-bottom:1.5px solid transparent;transition:.2s;
+    }
+    .spec-link:hover{border-color:var(--or)}
+
+    /* ── Food gallery strip ── */
+    .gallery-section{
+      padding:80px 60px;
+      background:#fff;
+    }
+    .gallery-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      grid-template-rows:auto auto;
+      gap:18px;
+      max-width:1200px;margin:0 auto 0;
+    }
+    .gallery-item{
+      border-radius:20px;overflow:hidden;
+      position:relative;cursor:pointer;
+    }
+    .gallery-item img{
+      width:100%;height:100%;object-fit:cover;
+      transition:.4s ease;display:block;
+    }
+    .gallery-item:hover img{transform:scale(1.06)}
+    .gallery-item.tall{grid-row:span 2}
+    .gallery-item .g-label{
+      position:absolute;bottom:0;left:0;right:0;
+      padding:14px 16px;
+      background:linear-gradient(transparent,rgba(0,0,0,0.55));
+      color:#fff;font-size:1rem;font-weight:600;
+      opacity:0;transition:.3s;
+    }
+    .gallery-item:hover .g-label{opacity:1}
+    @media(max-width:900px){
+      .gallery-grid{grid-template-columns:repeat(2,1fr)}
+      .gallery-item.tall{grid-row:span 1}
+      .specialities-section,.gallery-section{padding:60px 24px}
+    }
+    @media(max-width:500px){
+      .gallery-grid{grid-template-columns:1fr 1fr;gap:10px}
+      .specialities-section,.gallery-section{padding:44px 16px}
+    }
+
+    /* ── Footer ── */
+    .zq-footer{
+      background:#111;
+      color:#9CA3AF;
+      padding:60px 60px 36px;
+    }
+    .footer-inner{
+      max-width:1100px;margin:0 auto;
+      display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;
+    }
+    .footer-brand .logo-name{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#fff}
+    .footer-brand p{font-size:1rem;line-height:1.8;margin-top:14px;color:#9CA3AF}
+    .footer-col h4{font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;margin-bottom:18px}
+    .footer-col a{display:block;font-size:1rem;color:#9CA3AF;text-decoration:none;margin-bottom:12px;transition:.2s}
+    .footer-col a:hover{color:#FF5200}
+    .footer-bottom{
+      max-width:1100px;margin:40px auto 0;
+      border-top:1px solid #222;padding-top:22px;
+      display:flex;justify-content:space-between;align-items:center;
+      font-size:1rem;color:#9CA3AF;flex-wrap:wrap;gap:12px;
+    }
+    @media(max-width:900px){
+      .footer-inner{grid-template-columns:1fr 1fr;gap:30px}
+      .zq-footer{padding:44px 24px 28px}
+    }
+    @media(max-width:500px){
+      .footer-inner{grid-template-columns:1fr}
+      .footer-bottom{flex-direction:column;text-align:center}
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+<!-- ═══════════ LEFT ═══════════ -->
+<div class="left">
+  <div class="left-bg"></div>
+  <video class="left-video" autoplay muted loop playsinline>
+    <source src="{{ url_for('static', filename='login_hero_video.mp4') }}" type="video/mp4">
+  </video>
+  <div class="left-overlay"></div>
+  <div class="top-stripe"></div>
+  <div class="left-content">
+    <div class="logo" data-anim="left" style="--d:0ms">
+      <div class="logo-icon">🍽️</div>
+      <span class="logo-name">ZaaQa</span>
+    </div>
+    <div class="hero">
+      <div class="hero-pill" data-anim="up" style="--d:80ms">🌿 Fresh &amp; Authentic</div>
+      <h1 class="hero-h1" data-anim="up" style="--d:180ms">Hungry?<br/><span class="italic-gold">Let's ZaaQa!</span></h1>
+      <p class="hero-desc" data-anim="up" style="--d:280ms">25+ restaurants, 125+ dishes — all in one place. Amritsar ka asli zaayqa, ghar tak.</p>
+      <div class="chips" data-anim="up" style="--d:380ms">
+        <div class="chip">
+          <span class="chip-ico">⭐</span>
+          <div class="chip-txt"><span class="chip-label">Top Rated</span><span class="chip-sub">4.9★ avg rating</span></div>
+        </div>
+        <div class="chip">
+          <span class="chip-ico">🚀</span>
+          <div class="chip-txt"><span class="chip-label">Fast Delivery</span><span class="chip-sub">Under 30 mins</span></div>
+        </div>
+        <div class="chip">
+          <span class="chip-ico">💳</span>
+          <div class="chip-txt"><span class="chip-label">Safe Payment</span><span class="chip-sub">100% secure</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RIGHT ═══════════ -->
+<div class="right">
+
+  <!-- Corner leaf TL -->
+  <div class="clef clef-tl">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M6,11 C26,56 76,98 148,114" stroke="rgba(40,95,50,0.18)" stroke-width="1.1" fill="none"/>
+      <path d="M15,6 C42,48 90,84 142,94" stroke="rgba(40,95,50,0.12)" stroke-width="0.9" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,0 C52,65 104,158 86,280" stroke="rgba(55,120,65,0.30)" stroke-width="1.7" fill="none"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <ellipse cx="100" cy="235" rx="23" ry="13" transform="rotate(15 100 235)" fill="rgba(55,120,65,0.14)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+      <circle cx="182" cy="65" r="3.5" fill="rgba(180,90,20,0.24)"/>
+    </svg>
+  </div>
+
+  <!-- Corner leaf TR (mirror) -->
+  <div class="clef clef-tr">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M6,11 C26,56 76,98 148,114" stroke="rgba(40,95,50,0.18)" stroke-width="1.1" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+
+  <!-- Corner leaf BL (flip Y) -->
+  <div class="clef clef-bl">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,0 C52,65 104,158 86,280" stroke="rgba(55,120,65,0.30)" stroke-width="1.7" fill="none"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <ellipse cx="100" cy="235" rx="23" ry="13" transform="rotate(15 100 235)" fill="rgba(55,120,65,0.14)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+
+  <!-- Corner leaf BR (flip both) -->
+  <div class="clef clef-br">
+    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 C38,96 138,158 264,122 C138,202 30,182 0,0Z" fill="rgba(40,95,50,0.20)"/>
+      <path d="M0,0 C22,82 108,142 248,110" stroke="rgba(40,95,50,0.36)" stroke-width="1.9" fill="none"/>
+      <path d="M6,11 C26,56 76,98 148,114" stroke="rgba(40,95,50,0.18)" stroke-width="1.1" fill="none"/>
+      <path d="M0,0 C80,50 148,150 120,290 C52,188 16,94 0,0Z" fill="rgba(55,120,65,0.18)"/>
+      <path d="M0,0 C52,65 104,158 86,280" stroke="rgba(55,120,65,0.30)" stroke-width="1.7" fill="none"/>
+      <path d="M0,30 C68,82 170,100 262,68 C170,134 65,138 0,30Z" fill="rgba(65,128,68,0.13)"/>
+      <ellipse cx="175" cy="120" rx="30" ry="17" transform="rotate(-28 175 120)" fill="rgba(40,95,50,0.16)"/>
+      <path d="M0,0 C22,36 54,92 68,164" stroke="rgba(40,95,50,0.32)" stroke-width="2.1" fill="none"/>
+      <path d="M0,0 C40,28 100,57 184,70" stroke="rgba(40,95,50,0.26)" stroke-width="1.9" fill="none"/>
+      <circle cx="248" cy="104" r="5.5" fill="rgba(212,136,26,0.34)"/>
+      <circle cx="98" cy="252" r="4.5" fill="rgba(212,136,26,0.26)"/>
+    </svg>
+  </div>
+
+  <!-- Tagline -->
+  <div class="tagline-strip" data-anim="right" style="--d:100ms">
+    <div class="tl-pill">🍽️ <span>About ZaaQa</span></div>
+    <div class="tl-h">Amritsar ka <em>Zaayqa,</em> Ghar Tak — <em>Seedha &amp; Taza</em></div>
+    <div class="tl-p">ZaaQa brings 25+ authentic Amritsar restaurants to your door — real flavours, real speed, real trust.</div>
+    <div class="tl-rule"></div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-card" data-anim="up" style="--d:220ms">
+    <div class="eyebrow">Welcome Back</div>
+    <h2>{{ t('welcome_back') }} 👋</h2>
+    <p class="sub">{{ t('login_sub') }}</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    <form method="POST">
+      <div class="fld">
+        <i class="fas fa-envelope"></i>
+        <input type="email" name="email" placeholder="{{ t('email') }}" required/>
+      </div>
+      <div class="fld">
+        <i class="fas fa-lock"></i>
+        <input type="password" name="password" placeholder="{{ t('password') }}" required/>
+      </div>
+      <button type="submit" class="btn-or">{{ t('login_btn') }} &nbsp;<i class="fas fa-arrow-right"></i></button>
+    </form>
+    <div class="divider">{{ t('or_text') }}</div>
+    <div class="link-row">{{ t('no_account') }} <a href="/register">{{ t('register_link') }}</a></div>
+  </div>
+
+  <div class="bottom-strip" data-anim="up" style="--d:340ms">
+    <div class="sep"></div>
+    <div class="lang-row">
+      {% for code, info in all_langs.items() %}
+      <a href="/set_language/{{ code }}" class="lang-a {% if current_lang==code %}active{% endif %}">{{ info.flag }} {{ info.name }}</a>
+      {% endfor %}
+    </div>
+    <div class="trust">
+      <div class="trust-item"><i class="fas fa-shield-halved" style="color:var(--gold);font-size:.7rem"></i> Secure Login</div>
+      <div class="tdot"></div>
+      <div class="trust-item"><i class="fas fa-lock" style="color:var(--gold);font-size:.7rem"></i> Encrypted</div>
+      <div class="tdot"></div>
+      <div class="trust-item"><i class="fas fa-star" style="color:var(--gold);font-size:.7rem"></i> 4.9 Rated</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /.login-wrapper -->
+
+<!-- ═══════════ ABOUT SECTION (scrolls below) ═══════════ -->
+<div class="about-section">
+
+  <!-- Hero: Better food for more people -->
+  <div class="about-hero">
+    <img class="float-food ff1" src="{{ url_for('static', filename='food1.jpeg') }}" alt="Fresh food"/>
+    <img class="float-food ff2" src="{{ url_for('static', filename='pizza_fresh.png') }}" alt="Fresh Pizza"/>
+    <img class="float-food ff3" src="{{ url_for('static', filename='food10.png') }}" alt="Tasty food"/>
+    <img class="float-food ff4" src="{{ url_for('static', filename='food8.png') }}" alt="Special dish"/>
+    <h2 class="about-hero-title">Amritsar's Authentic Flavours,<br/>Delivered Fresh to Your Doorstep</h2>
+    <p class="about-hero-sub">ZaaQa brings together Amritsar's finest 25+ restaurants under one roof — delivering real flavours, lightning-fast service, and genuine trust. Whenever hunger strikes, ZaaQa is ready to serve you the very best of Punjab, fresh and on time.</p>
+  </div>
+
+  <!-- Specialities cards -->
+  <div class="specialities-section">
+    <div class="sec-eyebrow">✦ What Makes Us Special</div>
+    <h2 class="sec-title">ZaaQa's Signature Promise</h2>
+    <p class="sec-sub">Not just food — a complete experience rooted in the soul and spirit of Amritsar's rich culinary heritage.</p>
+    <div class="spec-grid">
+      <div class="spec-card">
+        <div class="spec-icon" style="background:#FFF3E0">🍛</div>
+        <div class="spec-name">25+ Restaurants</div>
+        <div class="spec-desc">Amritsar's finest dhabas and premium restaurants all in one place. Whether you crave buttery dal makhani, crispy kulchas, or sizzling tandoori — we have something special for every taste and every occasion.</div>
+        <a href="/restaurants" class="spec-link">Explore Restaurants →</a>
+      </div>
+      <div class="spec-card">
+        <div class="spec-icon" style="background:#FEF2F2">🚀</div>
+        <div class="spec-name">30 Min Delivery</div>
+        <div class="spec-desc">Hot, freshly prepared food delivered straight to your door in under 30 minutes — guaranteed. We partner only with kitchens that maintain the highest standards of speed, hygiene, and quality, every single day.</div>
+        <a href="/menu" class="spec-link">Order Now →</a>
+      </div>
+      <div class="spec-card">
+        <div class="spec-icon" style="background:#F0FDF4">🌿</div>
+        <div class="spec-name">Fresh & Authentic</div>
+        <div class="spec-desc">Zero compromises on quality. Every dish is prepared with fresh, locally sourced ingredients — bringing you the true, unadulterated taste of Punjabi cuisine exactly as it was meant to be enjoyed.</div>
+        <a href="/menu" class="spec-link">See Menu →</a>
+      </div>
+      <div class="spec-card">
+        <div class="spec-icon" style="background:#EFF6FF">⭐</div>
+        <div class="spec-name">4.9★ Rated</div>
+        <div class="spec-desc">Thousands of delighted customers trust ZaaQa every single day, making us Amritsar's #1 food delivery platform. Our commitment to excellence keeps customers coming back, meal after meal, day after day.</div>
+        <a href="/register" class="spec-link">Join ZaaQa →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Food gallery -->
+  <div class="gallery-section">
+    <div style="text-align:center;margin-bottom:50px">
+      <div class="sec-eyebrow">✦ Our Food Gallery</div>
+      <h2 class="sec-title">A Feast for the Eyes</h2>
+      <p class="sec-sub">These are not merely photographs — they are the flavours, aromas, and memories we deliver fresh to your doorstep every single day.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item tall" style="height:420px">
+        <img src="{{ url_for('static', filename='pizza_fresh.png') }}" alt="Fresh Pizza"/>
+        <div class="g-label">Amritsar Special</div>
+      </div>
+      <div class="gallery-item" style="height:200px">
+        <img src="{{ url_for('static', filename='salmon_plate.png') }}" alt="Grilled Salmon"/>
+        <div class="g-label">Grilled to Perfection</div>
+      </div>
+      <div class="gallery-item" style="height:200px">
+        <img src="{{ url_for('static', filename='biryani_special.png') }}" alt="Biryani Special"/>
+        <div class="g-label">Chef's Special Biryani</div>
+      </div>
+      <div class="gallery-item tall" style="height:420px">
+        <img src="{{ url_for('static', filename='seekh_kebab.png') }}" alt="Seekh Kebab"/>
+        <div class="g-label">Pure Punjabi Kebabs</div>
+      </div>
+      <div class="gallery-item" style="height:200px">
+        <img src="{{ url_for('static', filename='food2.png') }}" alt="ZaaQa food"/>
+        <div class="g-label">Ghar Jaisa Swaad</div>
+      </div>
+      <div class="gallery-item" style="height:200px">
+        <img src="{{ url_for('static', filename='food1.jpeg') }}" alt="ZaaQa food"/>
+        <div class="g-label">Daily Fresh</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="zq-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="logo-name">ZaaQa</div>
+        <p>ZaaQa is Amritsar's most loved food delivery platform — bringing together 25+ authentic restaurants and 125+ delicious dishes, all under one roof. From buttery dal makhani and crispy kulchas to tandoori specialties and fresh desserts, we deliver the real taste of Punjab straight to your doorstep. Fast, reliable, and always fresh — that is the ZaaQa promise.</p>
+      </div>
+      <div class="footer-col">
+        <h4>ZaaQa</h4>
+        <a href="/menu">Menu</a>
+        <a href="/restaurants">Restaurants</a>
+        <a href="/offers">Offers</a>
+        <a href="/orders">My Orders</a>
+      </div>
+      <div class="footer-col">
+        <h4>For Partners</h4>
+        <a href="#">Partner With Us</a>
+        <a href="#">List Your Restaurant</a>
+        <a href="#">Delivery Partner</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 ZaaQa — Amritsar ka Zaayqa</span>
+      <span>Made with ❤️ in Amritsar, Punjab</span>
+    </div>
+  </footer>
+
+</div><!-- /.about-section -->
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ── STAGGERED ENTRANCE ANIMATION ──
+  // Page-load elements — fire immediately
+  const pageElems = document.querySelectorAll('[data-anim]');
+
+  // Use requestAnimationFrame to ensure layout is ready, then trigger
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      pageElems.forEach(el => el.classList.add('is-visible'));
+    });
+  });
+</script>
+</html>

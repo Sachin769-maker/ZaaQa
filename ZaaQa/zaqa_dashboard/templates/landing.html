@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="{{ 'rtl' if current_lang == 'ur' else 'ltr' }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ZaaQa — Amritsar Ka Asli Swaad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,300;1,600;1,700&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--red:#E8380D;--gold:#C8952A;--gold2:#F5C842;--white:#fff}
+    html{scroll-behavior:smooth}
+    body{background:#000;overflow-x:hidden}
+
+    /* ── HERO ── */
+    #hero{position:relative;width:100%;height:100vh;min-height:600px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+    .hero-video{
+      position:absolute;inset:0;z-index:1;
+      width:100%;height:100%;
+      object-fit:cover;object-position:center 30%;
+      filter:brightness(0.82) contrast(1.18) saturate(1.55);
+    }
+
+    .vignette{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.15) 40%,transparent 62%),linear-gradient(to bottom,rgba(0,0,0,0.60) 0%,transparent 30%),radial-gradient(ellipse 120% 80% at 50% 55%,transparent 25%,rgba(0,0,0,0.65) 100%)}
+    .top-line{position:absolute;top:0;left:0;right:0;height:3px;z-index:20;background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--red) 50%,var(--gold) 80%,transparent)}
+
+    .hero-body{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;padding:0 24px;margin-top:120px}
+    .brand-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(3.5rem,9vw,7rem);font-weight:700;font-style:italic;line-height:0.88;letter-spacing:-2px;color:#fff;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) .2s both;text-shadow:0 4px 80px rgba(0,0,0,0.55),0 0 140px rgba(200,149,42,0.10)}
+    .brand-name .qa{color:var(--gold2)}
+    .hero-tagline{font-family:'Montserrat',sans-serif;font-size:clamp(.9rem,1.8vw,1.3rem);font-weight:800;letter-spacing:.3px;color:#fff;margin-top:14px;line-height:1.25;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) .45s both;text-shadow:0 2px 20px rgba(0,0,0,0.7)}
+    .hero-sub{font-family:'Montserrat',sans-serif;font-size:clamp(.68rem,1.1vw,.82rem);font-weight:400;color:rgba(255,255,255,.70);margin-top:8px;line-height:1.6;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) .65s both}
+
+    .hero-ctas{display:flex;gap:14px;margin-top:44px;animation:fadeUp 1s cubic-bezier(.16,1,.3,1) .85s both;flex-wrap:wrap;justify-content:center}
+    .cta-btn{display:inline-flex;align-items:center;gap:10px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:.88rem;letter-spacing:.5px;padding:16px 36px;border-radius:50px;text-decoration:none;border:none;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+    .cta-order{background:var(--red);color:#fff;box-shadow:0 8px 32px rgba(232,56,13,.45)}
+    .cta-order:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 40px rgba(232,56,13,.6);color:#fff}
+    .cta-explore{background:rgba(255,255,255,.10);color:#fff;border:1.5px solid rgba(255,255,255,.50);backdrop-filter:blur(12px)}
+    .cta-explore:hover{background:rgba(255,255,255,.20);transform:translateY(-3px) scale(1.04);color:#fff}
+
+    .scroll-down{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:7px;text-decoration:none;animation:fadeUp 1s ease 1.3s both}
+    .scroll-down span{font-family:'Montserrat',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.52)}
+    .chevrons{display:flex;flex-direction:column;align-items:center;gap:0}
+    .chevrons i{font-size:.8rem;color:rgba(255,255,255,.40);display:block;animation:scrollB 1.8s ease-in-out infinite}
+    .chevrons i:nth-child(2){animation-delay:.2s;opacity:.5}
+    @keyframes scrollB{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+    /* ── ABOUT ── */
+    #about{background:#FFFFFF;padding:110px 64px;display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
+    #about::before{content:'ਪੰਜਾਬ';position:absolute;right:-80px;top:50%;transform:translateY(-50%) rotate(-12deg);font-family:'Times New Roman',Times,serif;font-size:20rem;color:rgba(200,149,42,.06);font-weight:700;pointer-events:none;user-select:none;white-space:nowrap}
+    .about-wrap{max-width:1160px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;position:relative;z-index:1}
+    .sec-label{font-family:'Times New Roman',Times,serif;font-size:.72rem;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--red);display:block;margin-bottom:18px}
+    .about-h2{font-family:'Times New Roman',Times,serif;font-size:clamp(2.6rem,4.5vw,3.8rem);font-weight:700;font-style:italic;color:#111111;line-height:1.1;margin-bottom:28px}
+    .about-h2 em{color:var(--red);font-style:italic}
+    .about-p{font-family:'Times New Roman',Times,serif;font-size:1.15rem;font-weight:400;line-height:1.9;color:#333333;margin-bottom:18px}
+    .about-stats{display:flex;gap:44px;margin-top:44px;padding-top:32px;border-top:1px solid rgba(0,0,0,.12)}
+    .stat-val{font-family:'Times New Roman',Times,serif;font-size:2.8rem;font-weight:700;font-style:italic;color:var(--red);display:block;line-height:1}
+    .stat-lbl{font-family:'Times New Roman',Times,serif;font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#555555;margin-top:5px}
+    .about-mosaic{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:260px 200px;gap:14px}
+    .mosaic-img{border-radius:8px;background-size:cover;background-position:center;box-shadow:0 16px 48px rgba(0,0,0,.15);transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+    .mosaic-img:hover{transform:scale(1.03)}
+    .mosaic-img:nth-child(1){grid-column:1;grid-row:1/3;background-image:url("{{ url_for('static',filename='paneer_butter.png') }}")}
+    .mosaic-img:nth-child(2){background-image:url("{{ url_for('static',filename='pav_bhaji.png') }}")}
+    .mosaic-img:nth-child(3){background-image:url("{{ url_for('static',filename='momos.png') }}")}
+
+    /* ── FEATURES ── */
+    #features{background:#FFFFFF;padding:100px 0 100px 0;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-top:1px solid #EEEEEE}
+    #features::after{display:none}
+    .feat-inner{max-width:100%;width:100%;position:relative;z-index:1}
+    .feat-header{text-align:center;margin-bottom:64px;padding:0 64px}
+    .feat-header .sec-label{color:var(--red);font-family:'Times New Roman',Times,serif;letter-spacing:5px;font-size:.75rem}
+    .feat-h2{font-family:'Times New Roman',Times,serif;font-size:clamp(2.2rem,4.5vw,3.2rem);font-weight:700;font-style:normal;color:#111111;line-height:1.15}
+    .feat-h2 em{color:var(--red);font-style:normal}
+
+    /* Two column layout: video left, cards right */
+    .feat-layout{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:stretch}
+    .feat-video-wrap{border-radius:0;overflow:hidden;box-shadow:none;background:transparent}
+    .feat-video-wrap video{width:100%;height:100%;min-height:520px;object-fit:cover;display:block}
+    .feat-points{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:60px 48px;align-content:center}
+    .feat-point{padding:28px 22px;border:1px solid #E8E8E8;border-radius:10px;background:#FAFAFA;transition:all .35s ease;cursor:default}
+    .feat-point:hover{border-color:var(--red);background:#fff;transform:translateY(-5px);box-shadow:0 10px 30px rgba(232,56,13,.12)}
+    .feat-point .feat-icon{font-size:1.8rem;color:var(--red);margin-bottom:14px;display:block}
+    .feat-point h3{font-family:'Times New Roman',Times,serif;font-size:1.1rem;font-weight:700;color:#111;margin-bottom:8px}
+    .feat-point p{font-family:'Times New Roman',Times,serif;font-size:.88rem;color:#555;line-height:1.7;margin:0}
+
+    /* ── GET STARTED ── */
+    #get-started{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:110px 64px;overflow:hidden}
+    .gs-bg{display:block;position:absolute;inset:0;background-image:url("{{ url_for('static',filename='gs_bg.jpg') }}");background-size:cover;background-position:center;filter:brightness(0.95) saturate(1.05)}
+    .gs-overlay{display:block;position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.22) 100%)}
+    .gs-inner{position:relative;z-index:1;text-align:center;max-width:860px;width:100%}
+    .gs-inner .sec-label{color:#FFD700;font-family:'Times New Roman',Times,serif;letter-spacing:5px;font-size:.75rem;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+    .gs-h2{font-family:'Times New Roman',Times,serif;font-size:clamp(2.4rem,6vw,3.8rem);font-weight:700;font-style:normal;color:#FFFFFF;line-height:1.15;margin-bottom:14px;text-shadow:0 2px 20px rgba(0,0,0,.7)}
+    .gs-h2 em{color:#F0C040;font-style:normal}
+    .gs-sub{font-family:'Times New Roman',Times,serif;font-size:1.1rem;color:rgba(255,255,255,.90);margin-bottom:64px;font-weight:400;line-height:1.8;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+    .auth-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:700px;margin:0 auto}
+    .auth-card{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:48px 34px;text-align:center;transition:all .4s cubic-bezier(.34,1.2,.64,1);backdrop-filter:blur(18px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+    .auth-card.hot{border-color:rgba(232,56,13,.5);background:rgba(232,56,13,.12)}
+    .auth-card:hover{transform:translateY(-10px);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+    .auth-card.hot:hover{border-color:var(--red);box-shadow:0 24px 60px rgba(232,56,13,.3)}
+    .auth-emoji{font-size:2.5rem;display:block;margin-bottom:18px}
+    .auth-card h3{font-family:'Times New Roman',Times,serif;font-size:1.8rem;font-weight:700;font-style:normal;color:#FFFFFF;margin-bottom:10px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+    .auth-card p{font-family:'Times New Roman',Times,serif;font-size:1.05rem;color:rgba(255,255,255,.88);line-height:1.75;margin-bottom:32px;font-weight:400}
+    .auth-btn{display:block;font-family:'Times New Roman',Times,serif;font-size:1rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:14px 28px;border-radius:50px;text-decoration:none;transition:all .3s ease}
+    .auth-btn-red{background:var(--red);color:#fff;box-shadow:0 6px 24px rgba(232,56,13,.4)}
+    .auth-btn-red:hover{box-shadow:0 10px 32px rgba(232,56,13,.6);color:#fff;transform:scale(1.03)}
+    .auth-btn-out{border:1.5px solid rgba(255,255,255,.45);color:#fff;background:transparent}
+    .auth-btn-out:hover{background:rgba(255,255,255,.12);border-color:#fff;color:#fff}
+
+    /* ── NAV ── */
+    #nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:22px 52px;transition:background .5s ease,padding .4s ease}
+    #nav.solid{background:rgba(8,3,1,.94);backdrop-filter:blur(20px);padding:14px 52px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.9rem;font-weight:700;font-style:italic;text-decoration:none;letter-spacing:-1px}
+    .nav-logo .zaa{color:#fff}
+    .nav-logo .qa{color:var(--gold2)}
+    .nav-links{display:flex;align-items:center;gap:36px}
+    .nav-link{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:1.2px;color:rgba(255,255,255,.68);text-decoration:none;text-transform:uppercase;transition:color .3s ease}
+    .nav-link:hover{color:var(--gold2)}
+    .nav-cta{font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:10px 26px;border-radius:50px;background:var(--red);color:#fff;text-decoration:none;transition:all .3s ease;box-shadow:0 4px 16px rgba(232,56,13,.35)}
+    .nav-cta:hover{box-shadow:0 7px 24px rgba(232,56,13,.55);color:#fff;transform:translateY(-2px)}
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+    .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+    .reveal.in{opacity:1;transform:translateY(0)}
+    .reveal.d1{transition-delay:.12s}
+    .reveal.d2{transition-delay:.26s}
+    .reveal.d3{transition-delay:.42s}
+
+    @media(max-width:900px){
+      .about-wrap{grid-template-columns:1fr;gap:50px}
+      .feat-grid{grid-template-columns:1fr}
+      .auth-cards{grid-template-columns:1fr;max-width:380px}
+      .hero-ctas{flex-direction:column;align-items:center}
+      #nav,#nav.solid{padding:14px 24px}
+      #about,#features,#get-started{padding:80px 28px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo"><span class="zaa">Zaa</span><span class="qa">Qa</span></a>
+  <div class="nav-links">
+    <a href="#about"       class="nav-link">Our Story</a>
+    <a href="#features"    class="nav-link">Why ZaaQa</a>
+    <a href="#get-started" class="nav-link">Get Started</a>
+    <a href="{{ url_for('login') }}" class="nav-cta">Order Now</a>
+  </div>
+</nav>
+
+<!-- SECTION 1: HERO -->
+<section id="hero">
+  <div class="top-line"></div>
+
+  <!-- Hero background video -->
+  <video class="hero-video" autoplay muted loop playsinline id="heroVideo">
+    <source src="{{ url_for('static', filename='hero_video.mp4') }}" type="video/mp4">
+  </video>
+
+  <div class="vignette"></div>
+
+  <div class="hero-body">
+    <div class="brand-name"><span class="zaa">Zaa</span><span class="qa">Qa</span></div>
+    <div class="hero-tagline">Amritsar's #1<br>Food Delivery App</div>
+    <div class="hero-sub">Experience the real swaad of Punjab — fast, fresh &amp; at your door</div>
+    <div class="hero-ctas">
+      <a href="{{ url_for('login') }}"    class="cta-btn cta-order"><i class="fas fa-utensils"></i> Order Now</a>
+      <a href="{{ url_for('register') }}" class="cta-btn cta-explore"><i class="fas fa-user-plus"></i> Join ZaaQa</a>
+    </div>
+  </div>
+
+  <a href="#about" class="scroll-down">
+    <span>Scroll down</span>
+    <div class="chevrons">
+      <i class="fas fa-chevron-down"></i>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+  </a>
+</section>
+
+<!-- SECTION 2: ABOUT -->
+<section id="about">
+  <div class="about-wrap">
+    <div>
+      <span class="sec-label reveal">Our Heritage</span>
+      <h2 class="about-h2 reveal d1">Amritsar ki <em>Rooh,</em><br>Aapki Thali Mein</h2>
+      <p class="about-p reveal d2">ZaaQa was born from the golden lanes of Amritsar — where sizzling kulchas fill the morning air and every family guards a secret recipe passed down for generations.</p>
+      <p class="about-p reveal d2">We bring you the most authentic Punjabi flavours: buttery Amritsari Kulcha, smoky Seekh Kebabs, rich Dal Makhani, and fluffy Pindi Chole — made fresh, delivered fast, right to your door.</p>
+      <div class="about-stats reveal d3">
+        <div><span class="stat-val">50+</span><span class="stat-lbl">Dishes</span></div>
+        <div><span class="stat-val">4.8★</span><span class="stat-lbl">Rating</span></div>
+        <div><span class="stat-val">30m</span><span class="stat-lbl">Delivery</span></div>
+        <div><span class="stat-val">100%</span><span class="stat-lbl">Fresh</span></div>
+      </div>
+    </div>
+    <div class="about-mosaic reveal d2">
+      <div class="mosaic-img"></div>
+      <div class="mosaic-img"></div>
+      <div class="mosaic-img"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: FEATURES -->
+<section id="features">
+  <div class="feat-inner">
+    <div class="feat-header">
+      <span class="sec-label reveal">Why Choose Us</span>
+      <h2 class="feat-h2 reveal d1">The <em>ZaaQa</em> Difference</h2>
+    </div>
+    <div class="feat-layout">
+
+      <!-- LEFT: Video -->
+      <div class="feat-video-wrap reveal d1">
+        <video autoplay muted loop playsinline>
+          <source src="{{ url_for('static', filename='features_video.mp4') }}" type="video/mp4">
+        </video>
+      </div>
+
+      <!-- RIGHT: 4 Square Cards -->
+      <div class="feat-points">
+        <div class="feat-point reveal d1">
+          <span class="feat-icon"><i class="fas fa-fire-alt"></i></span>
+          <h3>Authentic Recipes</h3>
+          <p>Every dish follows age-old Amritsari recipes. No shortcuts — pure desi swaad in every bite.</p>
+        </div>
+        <div class="feat-point reveal d2">
+          <span class="feat-icon"><i class="fas fa-bolt"></i></span>
+          <h3>Lightning Delivery</h3>
+          <p>Piping hot food delivered within 30 minutes — from our kitchen to your table.</p>
+        </div>
+        <div class="feat-point reveal d3">
+          <span class="feat-icon"><i class="fas fa-leaf"></i></span>
+          <h3>Fresh Every Day</h3>
+          <p>Sourced daily from local Amritsar markets. No preservatives, no frozen shortcuts — ever.</p>
+        </div>
+        <div class="feat-point reveal d1">
+          <span class="feat-icon"><i class="fas fa-star"></i></span>
+          <h3>Honest Reviews</h3>
+          <p>Only verified customers can review. Every rating is real and helps us serve you better.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: GET STARTED -->
+<section id="get-started">
+  <div class="gs-bg"></div>
+  <div class="gs-overlay"></div>
+  <div class="gs-inner">
+    <span class="sec-label reveal">Let's Begin</span>
+    <h2 class="gs-h2 reveal d1">Ready for some <em>Asli Swaad?</em></h2>
+    <p class="gs-sub reveal d2">Join thousands of food lovers across Amritsar who trust ZaaQa for their daily cravings.</p>
+    <div class="auth-cards">
+      <div class="auth-card hot reveal d2">
+        <span class="auth-emoji">🍽️</span>
+        <h3>Sign In</h3>
+        <p>Welcome back! Log in and continue your ZaaQa journey.</p>
+        <a href="{{ url_for('login') }}" class="auth-btn auth-btn-red">Login to ZaaQa</a>
+      </div>
+      <div class="auth-card reveal d3">
+        <span class="auth-emoji">✨</span>
+        <h3>New Here?</h3>
+        <p>Create your free account in seconds and taste the difference.</p>
+        <a href="{{ url_for('register') }}" class="auth-btn auth-btn-out">Create Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ── HERO VIDEO SPEED ──
+  const heroVideo = document.getElementById('heroVideo');
+  heroVideo.playbackRate = 1.25;
+  heroVideo.addEventListener('play', () => { heroVideo.playbackRate = 1.25; });
+
+  // ── NAV ──
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('solid', window.scrollY > 80), {passive:true});
+  const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)} }), {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

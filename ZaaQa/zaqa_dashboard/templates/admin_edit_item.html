@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Edit Menu Item — Admin{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><h6 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Menu Item</h6></div>
+      <div class="card-body p-4">
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Restaurant</label>
+            <select name="restaurant_id" class="form-select" required>
+              {% for r in restaurants %}
+              <option value="{{ r.id }}" {% if r.id==item.restaurant_id %}selected{% endif %}>{{ r.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Item Name</label>
+            <input type="text" name="name" class="form-control" value="{{ item.name }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control" rows="2">{{ item.description }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Price (₹)</label>
+            <input type="number" name="price" class="form-control" step="0.01" value="{{ item.price }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Category</label>
+            <input type="text" name="category" class="form-control" value="{{ item.category }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Image URL</label>
+            <input type="url" name="image_url" id="imageUrlInput" class="form-control" value="{{ item.image_url or '' }}"/>
+          </div>
+          <div class="mb-3" id="previewBox" style="{{ 'display:block' if item.image_url else 'display:none' }}">
+            <img id="imgPreview" src="{{ item.image_url or '' }}" style="width:100%;height:160px;object-fit:cover;border-radius:10px"/>
+          </div>
+          <div class="mb-4 form-check">
+            <input class="form-check-input" type="checkbox" name="available" id="avail" {% if item.available %}checked{% endif %}/>
+            <label class="form-check-label fw-semibold" for="avail">Available</label>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Update</button>
+            <a href="{{ url_for('admin_menu') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  document.getElementById('imageUrlInput').addEventListener('input',function(){
+    const url=this.value.trim();
+    document.getElementById('previewBox').style.display=url?'block':'none';
+    document.getElementById('imgPreview').src=url;
+  });
+</script>
+{% endblock %}
